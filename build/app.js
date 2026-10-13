@@ -838,7 +838,7 @@ document.getElementById('clearAdBtn').addEventListener('click',()=>{ STATE.mSelA
 document.getElementById('refreshBtn').addEventListener('click',function(){ this.classList.add('loading'); location.href=location.pathname+'?t='+Date.now()+location.hash; });
 
 document.title=(B.client_sub?B.client_sub+' · ':'')+(B.client_name||'Dashboard');
-document.getElementById('logoMain').textContent=B.client_name||'—';
+{ const nm=(B.client_name||'—').trim(), k=nm.indexOf(' '); document.getElementById('logoMain').textContent=k>0?nm.slice(0,k):nm; document.getElementById('logoName').textContent=k>0?nm.slice(k+1):''; }
 document.getElementById('logoSub').textContent=B.client_sub||'';
 document.getElementById('taxLabel').textContent=B.tax_label||'Imposto';
 document.getElementById('updated').innerHTML='Última atualização:<br>'+B.generated_at_brt+' (BRT)';
