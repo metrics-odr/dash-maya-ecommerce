@@ -61,106 +61,61 @@ Ordem para colocar um cliente novo no ar. Cada item aponta o arquivo e o marcado
 
 ## O que é
 
-Dashboard de **Controle de Tráfego Pago** — app de BI estático (HTML/CSS/JS + Chart.js
-via CDN) publicado no **GitHub Pages**, que cruza o gerenciador **Meta Ads** com a lista
-de **Compradores** e se atualiza a cada ~30 min (build na nuvem via GitHub Actions,
-disparado pelo cron-job.org). **Somente leitura** das planilhas.
+Dashboard de **Controle de Tráfego Pago** do cliente **Maya Massafera** (Ecommerce ·
+BodySplash & Eau de Parfum) — app de BI estático (HTML/CSS/JS + Chart.js via CDN) publicado
+no **GitHub Pages**, que cruza **Meta Ads / Google Ads / TikTok Ads** com o **GA4** e a lista
+de **Compras**, e se atualiza a cada ~30 min (build na nuvem via GitHub Actions, disparado
+pelo cron-job.org). **Somente leitura** das planilhas.
 
-- **URL pública:** `https://<GITHUB_USERNAME>.github.io/<GITHUB_REPOSITORY>/`
-  (preencha `config.js` — ver checklist acima)
-- **Cliente/projeto:** preencher em `build/config.py` (`CLIENT_NAME`/`CLIENT_SUB`)
-- **Tipo de funil:** VSL / tráfego direto (não há etapa de Leads/MQL) —
-  `Gasto → Impressões → Cliques → Page Views → Checkouts → Vendas → Faturamento`
+- **URL pública:** `https://metrics-odr.github.io/dash-maya-ecommerce/`
+- **Cliente/projeto:** `build/config.py` (`CLIENT_NAME`/`CLIENT_SUB`)
+- **Tipo de funil:** Ecommerce —
+  `Gasto → Impressões → Cliques → Page Views → Product View → AddToCart → Checkouts → Compras → Faturamento`
 
 ## Fontes de dados (Google Sheets)
 
-> Preencha esta seção com os dados da planilha real do cliente depois de
-> configurar `build/config.py` (item 2 do checklist).
+Planilha "Maya | Planilha Central de Ecommerce" (`SPREADSHEET_ID` em `build/config.py`),
+leitura via export CSV (link público).
 
-Spreadsheet ID: preenchido em `SPREADSHEET_ID` (`build/config.py`) — as duas abas
-abaixo ficam, por padrão, na mesma planilha (leitura via export CSV).
-
-| Aba | gid | Colunas usadas (exemplo — ajuste à planilha real) |
+| Aba | gid (config) | Colunas usadas |
 |-----|-----|----------------|
-| **Meta Ads** | `GID_META` | Day · Campaign Name · Ad Set Name · Ad Name · Amount Spent · Impressions · Link Clicks · Landing Page Views · Checkouts Initiated |
-| **Compradores** | `GID_SALES` | Produto · Nome · Email · Data · Valor · **Faturamento** (se houver) · utm_source · utm_medium · utm_content · utm_term · utm_campaign · Status · … |
+| **Google Ads📥** | `GID_GOOGLE` = 888044421 | Day · Campaign · Ad Group · Ad Name · Cost (Spend) · Impressions · Clicks |
+| **GA4 📥** | `GID_GA4` = 1669456740 | Date · Event name · Session source/medium · Event count · **Sessions** · Total users |
+| **Compras 🛒** | `GID_SALES` = 1836439885 | Data · Nome · Email · Produto · **Preço** · **Order ID** · utm_source/campaign/medium/term/content |
+| **Meta Ads📥** | `GID_META` = *vazio — aguardando* | Day · Campaign Name · Ad Set Name · Ad Name · Amount Spent · Impressions · Link Clicks · vídeo · status · permalink |
+| TikTok Ads | `GID_TIKTOK` = *vazio — aguardando* | (mesmo formato do Meta/Google) |
 
-**Pontos de atenção ao configurar um cliente novo** (verifique contra a planilha real):
-- **Coluna de receita**: por padrão o alias de `val` prioriza `faturamento` sobre
-  `valor` (`header_index` em `build/build.py`) — confirme qual coluna representa o
-  valor líquido/bruto correto para este cliente e ajuste o alias se necessário.
-- **Coluna de status de pagamento**: se a planilha tiver uma coluna confiável de
-  status pago/aprovado, deixe `COUNT_ALL_AS_PAID = False` em `build/config.py`
-  (o build filtra por `is_paid()`). Se for uma lista de compradores onde toda
-  linha já é uma compra concretizada, deixe `True`.
-- **Identificador do anúncio**: confirme em qual coluna UTM o cliente manda o
-  nome do anúncio (`Ad Name` real do Meta) — muitas vezes é `UTM Content`, não
-  `UTM Term` (que costuma carregar o *posicionamento*: Reels/Feed/Stories). O
-  match Meta↔venda deve usar essa coluna.
+Canal sem GID = página do canal mostra "Aguardando dados" (o build segue normalmente). Para
+ligar: preencher o GID em `build/config.py`.
 
-URL de export CSV: `https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/export?format=csv&gid={GID}`
+### Regras do funil (`build.py` + `app.js`)
+- **Funil de conversão vem do GA4**: soma de **Sessions** dos eventos `page_view` (Page Views),
+  `view_item`/`item_view` (Product View), `add_to_cart` (AddToCart) e `begin_checkout` (Checkouts),
+  por dia e canal. O GA4 **não tem campanha/anúncio**: tabelas Campanha/Conjunto/Anúncio mostram só
+  mídia + compras (sem etapas do GA4); com filtro de campanha ativo, Page Views→Checkouts ficam ocultos.
+- **Canal** (`classify_channel` em `build/build.py`, aplicado ao Session source/medium do GA4 e a
+  utm_source/utm_medium das compras): **Google Ads = `google / cpc`**; Meta = facebook/fb/instagram/ig/meta
+  com medium NÃO orgânico (referral/social/bio… = Outros); TikTok idem; o resto = **Outros**
+  (só entra na Visão Geral). Listas ajustáveis (opcional) em `build/config.py`.
+- **Compras** = nº de **Order IDs distintos** (a aba tem 1 linha por item); **Faturamento** = soma do
+  **Preço** de todos os itens. Todas as compras contam (não há "produto principal"). Atribuição: canal
+  pelo UTM; se `utm_campaign` bate com uma campanha das abas de mídia, a compra herda canal e nome
+  reais da plataforma. `utm_content` só vira anúncio no Meta (Ad Name).
+- **Métricas**: CPM · CTR · CPC · CR (Page Views pagos/Cliques) · CPV · PVR (Product View/Page Views) · CPPV ·
+  ACR (AddToCart/Product View) · CPAC · VisCHK (Checkouts/AddToCart) · CPIC · ConvCHK (Compras/Checkouts) ·
+  CAC (Gasto/Compras) · Ticket Médio · ROAS (Faturamento/Gasto). Na Visão Geral, CAC/ROAS são *blended*
+  (gasto de mídia paga ÷ todas as compras) e CR/CPV usam só os page views dos canais pagos.
+- **Visão Geral** = acumulado de todos os canais (+ tabela "Resultado por canal"); **Meta/Google/TikTok** =
+  só o respectivo canal.
+- **Imposto**: `TAX_FACTOR = 1.0` (sem imposto; o toggle some). Se > 1, incide só sobre o gasto do Meta.
+- **Sem metas** de CAC/ROAS por enquanto (`0.0`): a Saúde do funil usa o histórico da conta.
+- **Indicativo ATIVO/PAUSADO** e **HR/BR/ER** (retenção de vídeo): aparecem no Meta se a planilha tiver as
+  colunas (resolvido no navegador; nunca agregue status por nome no `build.py`).
 
-### Métricas do funil VSL (`build.py` + `template.html`)
-`Gasto → Impressões → Cliques → Page Views → Checkouts → Vendas → Faturamento`
-
-Gasto · Impressões · CPM · Cliques · CPC · CTR · Page Views · CPV · CR (Cliques/PageViews) ·
-Checkouts · CPIC · VisCHK (Checkouts/PageViews) · Vendas · CAC (Gasto/Vendas) ·
-ConvCHK (Vendas/Checkouts) · Faturamento · ROAS (Faturamento/Gasto) · Ticket (Faturamento/Vendas).
-
-### Produto principal / atribuição
-- **Produto principal** = `MAIN_PRODUCT_PREFIX` (definido em `build/config.py`). Base de
-  **Vendas / CAC / ConvCHK / Ticket**.
-- **Faturamento / ROAS** = soma de **todos os produtos** do funil (orderbumps/upsells).
-- Uma venda entra no funil se: é o produto principal **OU** a combinação **`UTM Campaign`
-  + `UTM Content`** (campanha + anúncio) casa com uma linha real do Meta (captura
-  orderbumps/upsells que carregam a UTM do anúncio). O match exige campanha **e**
-  anúncio juntos — nomes de anúncio (`AD01`, `AD02`...) podem se repetir entre campanhas
-  diferentes; casar só pelo nome do anúncio atribuiria a venda à campanha errada. Quando
-  casa, a venda herda a campanha/conjunto **reais do Meta** (fica na mesma linha do
-  gasto nas tabelas). Vendas de outros funis (UTM/produto não relacionados) ficam de
-  fora. Só conta status pago.
-- Se não houver coluna de Receita, não há Receita/ROAS/Ticket — ajuste o texto desta
-  seção se o cliente novo tiver uma regra diferente.
-- **Upsell/downsell pós-compra (OPCIONAL)**: se o funil do cliente tiver, logo após
-  a compra do produto principal, uma oferta de upsell e, se recusada, um downsell
-  mais barato do MESMO produto (as duas aparecem com o texto IDÊNTICO na coluna
-  Produto), preencha `UPSELL_PRODUCT_PREFIX`/`UPSELL_SPLIT_VALUE`/
-  `UPSELL_USL_LABEL`/`UPSELL_DSL_LABEL` em `build/config.py` (comentado em
-  `config.example.py`). O build separa as duas ofertas pelo valor da venda; elas
-  entram no Faturamento/ROAS mas não em Vendas/CAC/ConvCHK/Ticket, e são
-  atribuídas ao Meta Ads herdando a campanha/anúncio da compra do produto
-  principal do MESMO comprador (casando por e-mail), já que upsell/downsell
-  normalmente não carregam UTM própria. Deixe os campos vazios se o funil não
-  tiver esse tipo de oferta (comportamento inalterado).
-- **Indicativo ATIVO/PAUSADO** (bolinha antes do nome nas tabelas de Campanhas/
-  Conjuntos/Anúncios da aba Meta Ads): OPCIONAL — aparece automaticamente se a
-  planilha do cliente tiver colunas de status por linha (aliases `campaign status`/
-  `ad set status`/`ad status` em `build/build.py`). Resolvido no navegador
-  (`latestStatusByDim()` em `build/app.js`), escopado pela mesma seleção de
-  campanha/conjunto/anúncio (drill-down) das tabelas — nunca agregue esse status
-  por nome sozinho no `build.py`: nomes de anúncio/conjunto podem se repetir em
-  campanhas diferentes como anúncios DISTINTOS, e agregar por nome vaza o status
-  de um anúncio ativo numa campanha para um anúncio pausado com o mesmo nome em
-  outra.
-- **HR/BR/ER (retenção de vídeo)**: OPCIONAL — se a planilha do cliente tiver as
-  colunas de video views (3s/50%/95%), essas 3 taxas aparecem automaticamente na
-  tabela de Anúncios (entre CPM e CTR), calculadas em `derive()`
-  (`build/app.js`) sobre Impressões.
-- **Busca por nome** nas tabelas de Campanhas/Conjuntos/Anúncios (campo de texto
-  ao lado do título) e **heatmap na coluna Vendas** (além de Gasto/Faturamento/
-  ROAS) já vêm por padrão no template, sem configuração.
-
-### Imposto Meta Ads
-Toggle ON aplica o `TAX_FACTOR` (definido em `build/config.py`) sobre os custos do Meta.
-
-### Convenções de campanha
-`Campaign Name = utm_campaign`, `Ad Set Name = utm_medium`, `Ad Name = utm_content`
-(⚠️ **confira se não é** `utm_term` no caso deste cliente — essa coluna costuma
-carregar o **posicionamento** do anúncio, não o nome dele — ver "Pontos de atenção"
-acima). O match com o Meta (campo `meta`, usado pela aba Meta Ads) exige
-`utm_campaign`+`utm_content` batendo com uma linha real do Meta; quando casa, a venda
-herda a campanha/conjunto reais do Meta (para o gasto e a venda caírem na mesma linha
-das tabelas).
+⚠️ Pontos a conferir quando houver acesso aos dados reais: (1) se `Preço` é o valor do item (soma) ou do
+pedido repetido por item; (2) se `Cost (Spend)` do Google está em R$ (não micros); (3) o texto exato de
+Session source/medium para Meta pago (ajustar `META_SOURCES`/`ORGANIC_MEDIUMS`); (4) o GA4 cobre menos
+dias que a aba Compras — em "Máximo" as taxas de conversão misturam períodos diferentes.
 
 ## IA Insights (legado)
 
@@ -193,7 +148,7 @@ build/app.js               # lógica + renderização (gráficos/heatmap leem as
 ia-worker/worker.js    # backend de IA legado/opcional (ENGINE — não editar por cliente; não usado pela UI atual)
 ia-worker/wrangler.toml # nome do Worker (preencher por cliente, placeholder nomecliente-ia-insights)
 build/relatorios.json  # briefings do Gestor por período (aba Relatórios) — VERSIONADO
-build/relatorios_metrics.json # números por período (gerado pelo Actions, lido pela Routine) — VERSIONADO
+build/relatorios_metrics.json # números por período (total, mídia paga, por canal, campanhas) — gerado pelo Actions, lido pela Routine
 build/gerar_relatorios.py # calcula as métricas por período (rodado pelo Actions, não pela Routine)
 build/GUIA-RELATORIOS.md  # passo a passo da Routine que regenera os briefings + particularidades deste funil
 build/METODO-ODR-ANALISE.md # ⭐ método de raciocínio (Método ODR) p/ redigir os briefings — genérico, não editar por cliente

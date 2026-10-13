@@ -1,5 +1,12 @@
 # GUIA — Geração diária dos Briefings do Gestor (aba Relatórios)
 
+> **Funil Ecommerce (Maya):** `relatorios_metrics.json` traz, por período: `total` (todos os canais),
+> `trafego_pago` (Meta+Google+TikTok), `canais` (meta/google/tiktok/outros), `campanhas`, `top_anuncios` e
+> `piores_anuncios` (só anúncios com nome — Meta). Etapas do funil: Page Views → Product View → AddToCart →
+> Checkouts → Compras (sessões GA4); CAC/ROAS do `total` são *blended*. Canais sem planilha (Meta/TikTok
+> "aguardando") vêm zerados — não os comente como queda de performance.
+
+
 > Lido pela **Routine diária (23h59 BRT)** do Claude Code que regenera
 > `build/relatorios.json`. **Não usa a API paga da Anthropic** — roda na
 > assinatura do Claude Code (sem consumir créditos). Toda a matemática vem de

@@ -15,15 +15,15 @@
 // busque por `<GITHUB_USERNAME>` e `<GITHUB_REPOSITORY>` no repositório.)
 window.CONFIG = {
   // Usuário ou organização dona do repositório no GitHub.
-  GITHUB_USERNAME: "",       // ex.: "seu-usuario"
+  GITHUB_USERNAME: "metrics-odr",       // ex.: "seu-usuario"
 
   // Nome do repositório no GitHub (o mesmo que você usou ao criar o repo a
   // partir deste template).
-  GITHUB_REPOSITORY: "",     // ex.: "dashboard-nome-do-cliente"
+  GITHUB_REPOSITORY: "dash-maya-ecommerce",     // ex.: "dashboard-nome-do-cliente"
 
   // Nome do projeto/cliente, usado só como referência em documentação e no
   // nome do Worker sugerido em ia-worker/wrangler.toml (ex.: "nomecliente-ia-insights").
-  PROJECT_NAME: "",          // ex.: "Nome do Cliente"
+  PROJECT_NAME: "Maya Massafera",          // ex.: "Nome do Cliente"
 
   // Preenchido automaticamente a partir de GITHUB_USERNAME/GITHUB_REPOSITORY
   // acima — é a URL pública que o dashboard terá depois de ativar o Pages.

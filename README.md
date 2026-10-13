@@ -1,19 +1,24 @@
-# Dashboard de Controle de Tráfego Pago (VSL/Tráfego Direto) — TEMPLATE
+# Dashboard de Tráfego Pago — Maya Massafera (Ecommerce · BodySplash & Eau de Parfum)
 
-> Este repositório é um **template reutilizável**. Ele ainda não está configurado
-> para nenhum cliente — siga o guia abaixo (ou o **CHECKLIST DE NOVO CLIENTE** no
-> topo do `CLAUDE.md`) para colocar um dashboard no ar em ~15-20 minutos.
+Dashboard publicado em **https://metrics-odr.github.io/dash-maya-ecommerce/**, gerado a partir do
+template de dashboards de tráfego pago. Config do cliente em `build/config.py` e `config.js`.
 
 ## Visão geral
 
 Dashboard de BI estática (HTML/CSS/JS + Chart.js via CDN) publicada no **GitHub
-Pages**, que cruza o gerenciador **Meta Ads** com uma lista de **Compradores**
-(duas abas de uma planilha Google Sheets) e se atualiza sozinha a cada ~30 min
-(build na nuvem via GitHub Actions, disparado pelo cron-job.org). **Somente
-leitura** das planilhas — o dashboard nunca escreve nelas.
+Pages**. Cruza **Meta Ads**, **Google Ads** e **TikTok Ads** (gasto, impressões, cliques) com o
+**GA4** (funil por sessões) e a lista de **Compras** (pedidos e faturamento) — abas de uma planilha
+Google Sheets — e se atualiza a cada ~30 min (build na nuvem via GitHub Actions, disparado pelo
+cron-job.org). **Somente leitura** das planilhas.
 
-Funil coberto: **VSL / tráfego direto** (sem etapa de Leads/MQL) —
-`Gasto → Impressões → Cliques → Page Views → Checkouts → Vendas → Faturamento`.
+Funil **Ecommerce**:
+`Gasto → Impressões → Cliques → Page Views → Product View → AddToCart → Checkouts → Compras → Faturamento`
+(Page Views a Checkouts = sessões GA4 dos eventos `page_view`, `view_item`, `add_to_cart`, `begin_checkout`).
+
+Abas: **Visão Geral** (acumulado de todos os canais) · **Meta Ads** · **Google Ads** · **TikTok Ads**
+(cada uma só com o seu canal; canais sem planilha mostram "Aguardando dados") · **Insights de IA**.
+O canal vem do **Session source / medium** (GA4) e de **utm_source / utm_medium** (Compras):
+Google Ads = `google / cpc`; Meta e TikTok = origem da plataforma com mídia paga; o resto = Outros.
 
 Como funciona, por dentro:
 
@@ -95,10 +100,10 @@ normalmente você não precisa mexer em nada manualmente. Para conferir/forçar:
    **Actions** → workflow **"Build & Deploy Dashboard"** → **Run workflow**
    (branch `main`).
 4. Depois do primeiro deploy bem-sucedido, a URL pública aparece em **Settings
-   → Pages** e é sempre `https://<GITHUB_USERNAME>.github.io/<GITHUB_REPOSITORY>/`.
+   → Pages** e é sempre `https://metrics-odr.github.io/dash-maya-ecommerce/`.
 5. Configure o cron-job.org para dar continuidade aos builds automáticos a cada
    30 min — passo a passo completo em **`SETUP-CRON.md`** (ele já vem com
-   placeholders `<GITHUB_USERNAME>`/`<GITHUB_REPOSITORY>` para você substituir
+   placeholders `metrics-odr`/`dash-maya-ecommerce` para você substituir
    pelos valores do seu `config.js`).
 
 ## Como configurar a planilha/API (Google Sheets)
@@ -171,7 +176,7 @@ Passo a passo:
 1. `cp config.example.js config.js`.
 2. Preencha `GITHUB_USERNAME`, `GITHUB_REPOSITORY` e `PROJECT_NAME`.
 3. Use esses **mesmos valores** para substituir manualmente os placeholders
-   `<GITHUB_USERNAME>` e `<GITHUB_REPOSITORY>` que aparecem em `SETUP-CRON.md`,
+   `metrics-odr` e `dash-maya-ecommerce` que aparecem em `SETUP-CRON.md`,
    `README.md` (este arquivo) e `CLAUDE.md` — são documentos Markdown estáticos,
    então a substituição não é automática (busque pelo texto exato no
    repositório e troque em cada ocorrência).
