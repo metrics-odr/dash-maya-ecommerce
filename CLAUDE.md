@@ -30,7 +30,7 @@ Ordem para colocar um cliente novo no ar. Cada item aponta o arquivo e o marcado
 4. [ ] **`config.js`** (raiz do repo) — copie `config.example.js` para
    `config.js` e preencha `GITHUB_USERNAME`, `GITHUB_REPOSITORY`,
    `PROJECT_NAME`. Depois substitua manualmente os placeholders
-   `metrics-odr`/`dash-maya-ecommerce` que aparecem em `SETUP-CRON.md` e
+   `<GITHUB_USERNAME>`/`<GITHUB_REPOSITORY>` que aparecem em `SETUP-CRON.md` e
    `README.md` pelos mesmos valores (são docs Markdown estáticos, a
    substituição não é automática).
 5. [ ] **`SETUP-CRON.md`** — depois do passo acima, gere um **token
