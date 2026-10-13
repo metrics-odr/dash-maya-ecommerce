@@ -81,10 +81,18 @@
           </div>
         </div>
 
+        <div class="funnel-charts">
+        <div>
         <h2 class="sec-title">Resultado por canal</h2>
         <div class="card" style="padding:0">
           <div class="tbl-wrap"><table class="dt" id="gChan"></table></div>
           <p class="note" style="padding:10px 15px">Canal definido por <b>Session source / medium</b> (GA4) e <b>utm_source / utm_medium</b> (Compras): Google Ads = <code>google / cpc</code>; Meta e TikTok = origem da plataforma com mídia paga; o restante = Outros.</p>
+        </div>
+        </div>
+        <div>
+        <h2 class="sec-title">Compras por produto</h2>
+        <div class="card" style="padding:0"><div class="tbl-wrap" style="max-height:260px"><table class="dt" id="gProd"></table></div></div>
+        </div>
         </div>
 
         <h2 class="sec-title">Indicadores por dia</h2>
@@ -94,8 +102,6 @@
           <div class="card"><h3>ACR e VisCHK por dia</h3><p class="hint">ACR = AddToCart/Product View · VisCHK = Checkouts/AddToCart</p><div class="chart-box chart-sm"><canvas id="gAcrChk"></canvas></div></div>
           <div class="card"><h3>Conversão em compra por dia</h3><p class="hint">ConvCHK = Compras/Checkouts · Compras/Page View</p><div class="chart-box chart-sm"><canvas id="gConv"></canvas></div></div>
         </div>
-        <h2 class="sec-title">Compras por produto</h2>
-        <div class="card" style="padding:0"><div class="tbl-wrap" style="max-height:260px"><table class="dt" id="gProd"></table></div></div>
       </div>
 
       <!-- ===================== PÁGINA 2: CANAL DE MÍDIA (Meta / Google / TikTok) ===================== -->
