@@ -99,6 +99,12 @@
   .three-col{grid-template-columns:360px 1fr}
   .funnel-grid{grid-template-columns:340px 1fr; align-items:start}
   .funnel-charts{display:grid; grid-template-columns:1fr 1fr; gap:16px; align-content:start}
+  /* Resultado por canal (esq., encolhe/rola) + Compras por produto (dir., cabe inteira); mesma altura */
+  .chan-prod{display:grid; grid-template-columns:minmax(0,1fr) minmax(400px,32%); gap:16px; align-items:stretch}
+  .chan-prod>div{display:flex; flex-direction:column; min-width:0}
+  .chan-prod>div>.card{flex:1; display:flex; flex-direction:column}
+  .chan-prod>div>.card>.tbl-wrap{flex:1}
+  @media(max-width:1200px){.chan-prod{grid-template-columns:minmax(0,1fr)}}
   @media(max-width:1000px){.two-col,.three-col,.funnel-grid{grid-template-columns:1fr}}
   @media(max-width:1200px){.funnel-charts{grid-template-columns:1fr}}
   .card{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px}
