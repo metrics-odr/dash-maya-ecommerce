@@ -100,7 +100,7 @@
   .funnel-grid{grid-template-columns:340px 1fr; align-items:start}
   .funnel-charts{display:grid; grid-template-columns:1fr 1fr; gap:16px; align-content:start}
   /* Resultado por canal (esq., encolhe/rola) + Compras por produto (dir., cabe inteira); mesma altura */
-  .chan-prod{display:grid; grid-template-columns:minmax(0,1fr) minmax(400px,32%); gap:16px; align-items:stretch}
+  .chan-prod{display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); gap:16px; align-items:stretch}
   .chan-prod>div{display:flex; flex-direction:column; min-width:0}
   .chan-prod>div>.card{flex:1; display:flex; flex-direction:column}
   .chan-prod>div>.card>.tbl-wrap{flex:1}
@@ -187,6 +187,10 @@
   table.dt td.dim{font-weight:500}
   table.dt thead th.sorted-asc::after{content:" ▲"; font-size:9px}
   table.dt thead th.sorted-desc::after{content:" ▼"; font-size:9px}
+  table.dt.fit{min-width:0}
+  table.dt.fit th, table.dt.fit td{padding:7px 6px}
+  table.dt.fit thead th{white-space:normal; line-height:1.2; vertical-align:bottom}
+  .tbl-wrap:has(table.dt.fit){overflow-x:hidden}
   table.dt tbody tr{cursor:pointer}
   table.dt tbody tr:hover{background:var(--accent-blue-light)}
   table.dt tbody tr.sel{background:var(--selected)}
