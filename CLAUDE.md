@@ -82,7 +82,7 @@ leitura via export CSV (link público).
 | **Google Ads📥** | `GID_GOOGLE` = 888044421 | Day · Campaign · Ad Group · Ad Name · Cost (Spend) · Impressions · Clicks |
 | **GA4 📥** | `GID_GA4` = 1669456740 | Date · Event name · Session source/medium · Event count · **Sessions** · Total users |
 | **Compras 🛒** | `GID_SALES` = 1836439885 | Data · Nome · Email · Produto · **Preço** · **Order ID** · utm_source/campaign/medium/term/content |
-| **Meta Ads📥** | `GID_META` = *vazio — aguardando* | Day · Campaign Name · Ad Set Name · Ad Name · Amount Spent · Impressions · Link Clicks · vídeo · status · permalink |
+| **Meta Ads📥** | `GID_META` = 1195145852 | Day · Campaign Name · Ad Set Name · Ad Name · Amount Spent · Impressions · Link Clicks · vídeo · status · permalink |
 | TikTok Ads | `GID_TIKTOK` = *vazio — aguardando* | (mesmo formato do Meta/Google) |
 
 Canal sem GID = página do canal mostra "Aguardando dados" (o build segue normalmente). Para

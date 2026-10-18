@@ -24,7 +24,7 @@ GID_GA4 = "1669456740"  # OBRIGATÓRIO · aba GA4 (Date · Event name · Session
 GID_SALES = "1836439885"  # OBRIGATÓRIO · aba Compras (1 linha por item: Data · Produto · Preço · Order ID · utm_*)
 # Mídia paga: deixe "" no canal que ainda não tem planilha — a página do canal
 # mostra "Aguardando dados" e o build segue normalmente.
-GID_META = ""         # AGUARDANDO planilha — aba "Meta Ads📥" existe, mas sem dados/gid definido · aba Meta Ads  (Day · Campaign Name · Ad Set Name · Ad Name · Amount Spent · Impressions · Link Clicks · ...)
+GID_META = "1195145852"   # aba "Data Base do Meta Ads" (Day · Campaign Name · Ad Set Name · Ad Name · Amount Spent · Impressions · Link Clicks · ...)
 GID_GOOGLE = "888044421"  # aba Google Ads (Day · Campaign · Ad Group · Ad Name · Cost · Impressions · Clicks)
 GID_TIKTOK = ""       # AGUARDANDO planilha · aba TikTok Ads (mesmo formato do Meta/Google)
 
