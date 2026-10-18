@@ -362,18 +362,39 @@ function deltaBadge(cur,prev,key){
   const cls=flat?'flat':(good?'good':'bad'), arrow=flat?'→':(up?'▲':'▼');
   return `<span class="delta ${cls}">${arrow} ${nf1.format(Math.abs(p))}%</span>`;
 }
-function renderFunnel(id, steps){
-  document.getElementById(id).innerHTML=steps.map(s=>{
-    const color=s[4]?`var(${s[4]})`:'var(--accent-blue)';
-    const hi=(s[3]==='gasto'||s[3]==='fat');   // valores em destaque + contorno inteiro
-    const border=hi?`border-color:${color}`:`border-left-color:${color}`;
-    const secs=s[2].map(x=>`<div><span class="s-label">${x[0]}</span><span class="s-val${x[2]?' s-pill '+x[2]:''}">${x[1]}</span></div>`).join('');
-    return `<div class="step" style="${border}">
-      <div class="step-main"><div class="m-label">${s[0]}</div>
-        <div class="m-val"${hi?` style="color:${color}"`:''}>${s[1]}</div>
-        ${s[5]?`<div class="m-delta">${s[5]}</div>`:''}</div>
-      <div class="secs">${secs}</div></div>`;
+/* sparkline (SVG) da série diária de uma etapa; sem dados suficientes -> vazio */
+function spark(vals){
+  const v=vals.map(x=>(x==null||!isFinite(x))?null:x), n=v.length, nums=v.filter(x=>x!=null);
+  if(!nums.length) return '<svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none"></svg>';
+  const mn=Math.min(...nums), mx=Math.max(...nums), rg=(mx-mn)||1;
+  const X=i=>n>1?i/(n-1)*100:50, Y=x=>mx===mn?15:27-(x-mn)/rg*24;
+  const pts=[]; v.forEach((x,i)=>{ if(x!=null) pts.push([X(i),Y(x)]); });
+  const line=pts.map((q,i)=>(i?'L':'M')+q[0].toFixed(1)+' '+q[1].toFixed(1)).join(' ');
+  const last=pts[pts.length-1];
+  const area=pts.length>1?`<path d="${line} L${last[0].toFixed(1)} 30 L${pts[0][0].toFixed(1)} 30 Z" class="spark-area"/>`:'';
+  return `<svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none">${area}<path d="${line}" class="spark-line"/></svg>`;
+}
+/* funil horizontal: KPIs (Gasto/Faturamento/ROAS/Ticket) + etapas em linha, com a taxa de conversão entre elas */
+function renderFunnel(id, steps, dd){
+  dd=dd||[];
+  const st={}; steps.forEach(s=>st[s[3]]=s);
+  const ser={gasto:x=>x.sp, impr:x=>x.im, cl:x=>x.cl, pv:x=>x.pv, vi:x=>x.vi, atc:x=>x.atc, ck:x=>x.ck, vendas:x=>x.vendas, fat:x=>x.fat,
+    roas:x=>x.sp?x.fat/x.sp:null, ticket:x=>x.vendas?x.fat/x.vendas:null};
+  const sp=k=>spark(dd.map(ser[k]));
+  const sec=(s,i)=>s[2][i]||['',''];
+  const pill=x=>`<span class="s-val${x[2]?' s-pill '+x[2]:''}">${x[1]}</span>`;
+  const kpi=(label,val,key,delta,cls)=>`<div class="fk"><div class="fk-label">${label}</div><div class="fk-val ${cls||''}">${val}</div>${delta?`<div class="m-delta">${delta}</div>`:''}${sp(key)}</div>`;
+  const g=st.gasto, f=st.fat, roas=sec(f,0), tick=sec(f,1);
+  const kpis=kpi('Gasto total',g[1],'gasto',g[5])+kpi('Faturamento',f[1],'fat',f[5])
+    +kpi('ROAS',roas[1],'roas','','roas-v')+kpi('Ticket médio',tick[1],'ticket');
+  const order=['impr','cl','pv','vi','atc','ck','vendas'];
+  const stepsHtml=order.map((k,i)=>{
+    const s=st[k], cost=sec(s,0), rate=sec(s,1);
+    const conn=i?`<div class="fs-conn"><span class="fs-arrow">›</span><span class="fs-rate-l">${rate[0]}</span><span class="fs-rate">${rate[1]}</span></div>`:'';
+    return conn+`<div class="fs"><div class="fs-label">${s[0]}</div><div class="fs-val">${s[1]}</div>${s[5]?`<div class="m-delta">${s[5]}</div>`:''}${sp(k)}
+      <div class="fs-cost"><span class="s-label">${cost[0]}</span>${pill(cost)}</div></div>`;
   }).join('');
+  document.getElementById(id).innerHTML=`<div class="fnl-kpis">${kpis}</div><div class="fnl-steps">${stepsHtml}</div>`;
 }
 /* noGA: com campanha/conjunto/anúncio selecionado as etapas do GA4 não existem naquele nível */
 function funnelSteps(t, tp, noGA){
@@ -407,8 +428,8 @@ function renderGeral(){
   const S=scopeData(null), t=totals(S.fS,S.fM,S.fG), d=derive(t);
   const pw=prevWindow(); let tp=null;
   if(pw){ const P=scopeData(null,null,pw); tp=totals(P.fS,P.fM,P.fG); }
-  renderFunnel('geralFunnel', funnelSteps(t, tp, false));
   const dd=daily(S.fS,S.fM,S.fG);
+  renderFunnel('geralFunnel', funnelSteps(t, tp, false), dd);
   convCharts(['gCpmCtr','gCrPvr','gAcrChk','gConv'], dd);
   comboChart('gCombo', dd);
   renderProdTable('gProd', S.fS);
@@ -473,9 +494,9 @@ function renderChannel(){
   document.querySelectorAll('.ch-name').forEach(e=>e.textContent=label);
   const pw=prevWindow(); let tp=null;
   if(pw){ const P=scopeData(ch,null,pw); tp=totals(P.fS,P.fM,P.fG); }
-  renderFunnel('metaFunnel', funnelSteps(t, tp, S.sel));
-
   const dd=daily(S.fS,S.fM,S.fG);
+  renderFunnel('metaFunnel', funnelSteps(t, tp, S.sel), dd);
+
   convCharts(['mCpmCtr','mCrPvr','mAcrChk','mConv'], dd);
   comboChart('mCombo', dd);
   const aggAd=buildAgg(S.fS,S.fM,'ad');

@@ -97,7 +97,7 @@
   .grid{display:grid; gap:16px}
   .two-col{grid-template-columns:380px 1fr}
   .three-col{grid-template-columns:360px 1fr}
-  .funnel-grid{grid-template-columns:340px 1fr; align-items:start}
+  .funnel-grid{grid-template-columns:minmax(0,1fr); align-items:start}
   .funnel-charts{display:grid; grid-template-columns:1fr 1fr; gap:16px; align-content:start}
   /* Resultado por canal (esq., encolhe/rola) + Compras por produto (dir., cabe inteira); mesma altura */
   .chan-prod{display:grid; grid-template-columns:minmax(0,1fr) minmax(400px,32%); gap:16px; align-items:stretch}
@@ -134,21 +134,40 @@
   .chart-box{position:relative; height:260px}
   .chart-sm{height:190px}
 
-  /* Funnel */
-  .funnel{display:flex; flex-direction:column; gap:7px}
-  .step{display:flex; align-items:center; justify-content:space-between; gap:14px; row-gap:8px; flex-wrap:wrap; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:11px 15px; border-left:4px solid var(--accent-blue)}
-  .step .step-main{min-width:0}
-  .step .m-label{font-size:11.5px; color:var(--muted)}
-  .step .m-val{font-size:20px; font-weight:700; letter-spacing:-.02em; white-space:nowrap}  /* nunca quebra a linha */
-  .step .m-delta{margin-top:3px; line-height:1}
-  /* variação vs período anterior: verde = bom, vermelho = ruim (fonte fina) */
+  /* Funil horizontal */
+  .funnel{display:block}
+  .fnl-kpis{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px}
+  .fk{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 14px; min-width:0}
+  .fk-label{font-size:11.5px; color:var(--muted)}
+  .fk-val{font-size:22px; font-weight:700; letter-spacing:-.02em; margin-top:4px; white-space:nowrap}
+  .fk-val.roas-v{color:var(--pill-roas)}
+  .fnl-steps{display:flex; align-items:stretch; gap:0; margin-top:12px}
+  .fs{flex:1 1 0; min-width:0; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:11px 12px; display:flex; flex-direction:column}
+  .fs:last-child{border-color:var(--accent-blue); box-shadow:0 0 0 1px var(--accent-blue)}
+  .fs-label{font-size:11.5px; color:var(--muted)}
+  .fs-val{font-size:20px; font-weight:700; letter-spacing:-.02em; margin-top:4px; white-space:nowrap}
+  .fs-cost{margin-top:auto; padding-top:6px; flex-wrap:wrap; display:flex; justify-content:space-between; align-items:baseline; gap:6px}
+  .fs-cost .s-label{font-size:10.5px; color:var(--muted)}
+  .fs-cost .s-val.s-pill{padding:2px 6px; font-size:12px}
+  .fs-cost .s-val{font-size:12.5px; font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap}
+  .fs-conn{flex:0 0 58px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; font-size:11px; line-height:1.25}
+  .fs-arrow{color:var(--muted); font-size:15px; line-height:1}
+  .fs-rate-l{color:var(--muted); font-size:10.5px}
+  .fs-rate{font-weight:600; font-variant-numeric:tabular-nums; font-size:11.5px}
+  .spark{display:block; width:100%; height:34px; margin:8px 0 2px; overflow:visible}
+  .spark-line{fill:none; stroke:var(--accent-blue); stroke-width:1.6; vector-effect:non-scaling-stroke; stroke-linejoin:round}
+  .spark-area{fill:var(--accent-blue); opacity:.14; stroke:none}
+  @media(max-width:1100px){
+    .fnl-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .fnl-steps{overflow-x:auto; padding-bottom:6px}
+    .fs{flex:0 0 130px}
+  }
   .delta{font-size:11.5px; font-weight:400; white-space:nowrap; font-variant-numeric:tabular-nums}
+  .m-delta{margin-top:3px; line-height:1}
   .delta.good{color:var(--good)}
   .delta.bad{color:var(--bad)}
   .delta.flat{color:var(--muted)}
-  .step .secs{display:flex; gap:16px; flex-wrap:wrap; justify-content:flex-end; text-align:right; flex-shrink:0; margin-left:auto}
-  .step .secs .s-label{font-size:10.5px; color:var(--muted); display:block; margin-bottom:3px}
-  .step .secs .s-val{font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap}
+  .s-label{display:block}
   /* valores em "tag" (estilo pill) — CAC azul leve, ROAS dourado */
   .s-val.s-pill{display:inline-block; padding:2px 9px; border-radius:999px; font-size:13px}
   .s-pill.cac{color:var(--pill-cac); background:var(--pill-cac-bg)}
@@ -237,9 +256,9 @@
     .kpi .kv{font-size:19px}
     .kpis.n2 .kpi .kv{font-size:16px}
 
-    /* funil: métricas secundárias (CAC/ROAS) não ficam espremidas à direita */
-    .step{padding:10px 12px}
-    .step .secs{justify-content:flex-start; margin-left:0; width:100%}
+    /* funil horizontal: cards mais compactos */
+    .fk-val{font-size:19px}
+    .fs{flex:0 0 120px}
 
     /* tabelas: menos altura fixa, sobra mais tela p/ o resto */
     .tbl-normal{max-height:220px}
