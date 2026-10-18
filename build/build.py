@@ -226,7 +226,9 @@ def classify_channel(source: str, medium: str) -> str:
         return "google" if m in GOOGLE_PAID_MEDIUMS else "outros"
     if s in TIKTOK_SOURCES or "tiktok" in s:
         return "outros" if m in ORGANIC_MEDIUMS else "tiktok"
-    if s in META_SOURCES:
+    # Meta: source exato ("fb", "ig", "facebook"...) ou variações de posicionamento/macro do
+    # Meta ("Instagram_Reels", "facebook_mobile_feed", "fb_ads", "ig-stories"...)
+    if s in META_SOURCES or re.search(r"facebook|instagram|meta\b", s) or re.match(r"^(fb|ig)[\s_\-]", s):
         return "outros" if m in ORGANIC_MEDIUMS else "meta"
     return "outros"
 
