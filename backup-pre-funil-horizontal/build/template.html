@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- cache-bust: pagina nunca servida de cache; dados mudam a cada 30 min -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="build" content="__BUILD_ID__">
+<title>Dashboard</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>__STYLES__</style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="app">
+  <input type="checkbox" id="navToggle">
+  <label class="nav-backdrop" for="navToggle"></label>
+  <aside class="sidebar">
+    <div class="logo"><div class="logo-main" id="logoMain"></div><div class="logo-name" id="logoName"></div><div class="logo-sub" id="logoSub"></div></div>
+    <div class="sec">Dashboards</div>
+    <div class="nav-item active" data-page="geral"><svg class="ic ic-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.2 8h13.6l1 12.2a1 1 0 0 1-1 1.1H5.2a1 1 0 0 1-1-1.1z"/><path d="M8.5 10.5V7a3.5 3.5 0 0 1 7 0v3.5"/></svg> Visão Geral</div>
+    <div class="nav-item" data-page="meta"><svg class="ic ic-svg" viewBox="0 0 24 24" aria-hidden="true"><path fill="#0081FB" d="M6.915 4.03c-1.968 0-3.683 1.28-4.871 3.113C.704 9.208 0 11.883 0 14.449c0 .706.07 1.369.21 1.973a6.624 6.624 0 0 0 .265.86 5.297 5.297 0 0 0 .371.761c.696 1.159 1.818 1.927 3.593 1.927 1.497 0 2.633-.671 3.965-2.444.76-1.012 1.144-1.626 2.663-4.32l.756-1.339.186-.325c.061.1.121.196.183.3l2.152 3.595c.724 1.21 1.665 2.556 2.47 3.314 1.046.987 1.992 1.22 3.06 1.22 1.075 0 1.876-.355 2.455-.843a3.743 3.743 0 0 0 .81-.973c.542-.939.861-2.127.861-3.745 0-2.72-.681-5.357-2.084-7.45-1.282-1.912-2.957-2.93-4.716-2.93-1.047 0-2.088.467-3.053 1.308-.652.57-1.257 1.29-1.82 2.05-.69-.875-1.335-1.547-1.958-2.056-1.182-.966-2.315-1.303-3.454-1.303zm10.16 2.053c1.147 0 2.188.758 2.992 1.999 1.132 1.748 1.647 4.195 1.647 6.4 0 1.548-.368 2.9-1.839 2.9-.58 0-1.027-.23-1.664-1.004-.496-.601-1.343-1.878-2.832-4.358l-.617-1.028a44.908 44.908 0 0 0-1.255-1.98c.07-.109.141-.224.211-.327 1.12-1.667 2.118-2.602 3.358-2.602zm-10.201.553c1.265 0 2.058.791 2.675 1.446.307.327.737.871 1.234 1.579l-1.02 1.566c-.757 1.163-1.882 3.017-2.837 4.338-1.191 1.649-1.81 1.817-2.486 1.817-.524 0-1.038-.237-1.383-.794-.263-.426-.464-1.13-.464-2.046 0-2.221.63-4.535 1.66-6.088.454-.687.964-1.226 1.533-1.533a2.264 2.264 0 0 1 1.088-.285z"/></svg> Meta Ads</div>
+    <div class="nav-item" data-page="google"><svg class="ic ic-svg" viewBox="0 0 24 24" aria-hidden="true"><path fill="#34A853" d="M3.9998 22.9291C1.7908 22.9291 0 21.1383 0 18.9293s1.7908-3.9998 3.9998-3.9998 3.9998 1.7908 3.9998 3.9998-1.7908 3.9998-3.9998 3.9998z"/><path fill="#4285F4" d="M23.4641 16.9287L15.4632 3.072C14.3586 1.1587 11.9121.5028 9.9988 1.6074S7.4295 5.1585 8.5341 7.0718l8.0009 13.8567c1.1046 1.9133 3.5511 2.5679 5.4644 1.4646 1.9134-1.1046 2.568-3.5511 1.4647-5.4644z"/><path fill="#FBBC04" d="M7.5137 4.8438L1.5645 15.1484A4.5 4.5 0 0 1 4 14.4297c2.5597-.0075 4.6248 2.1585 4.4941 4.7148l3.2168-5.5723-3.6094-6.25c-.4499-.7793-.6322-1.6394-.5878-2.4784z"/></svg> Google Ads</div>
+    <div class="nav-item" data-page="tiktok"><svg class="ic ic-svg" viewBox="0 0 24 24" aria-hidden="true"><defs><path id="ttn" d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></defs><g transform="translate(2.4 1.6) scale(.8)"><use href="#ttn" transform="translate(-.9 -.9)" fill="#25F4EE"/><use href="#ttn" transform="translate(.9 .9)" fill="#FE2C55"/><use href="#ttn" fill="#fff"/></g></svg> TikTok Ads</div>
+    <div class="nav-item" data-page="rel"><span class="ic">✦</span> Insights de IA</div>
+    <div class="foot">Somente leitura · atualiza ~30 min<br><span id="buildFoot"></span></div>
+  </aside>
+
+  <div class="main-area">
+    <div class="topbar">
+      <label class="ham" for="navToggle" title="Menu">☰</label>
+      <div class="ptitle" id="ptitle">Visão Geral</div>
+      <div class="sep"></div>
+      <div class="period-picker" id="periodPicker">
+        <button class="btn period-btn" id="periodBtn" aria-haspopup="true" aria-expanded="false">
+          <span class="period-ic">🗓</span>
+          <span class="period-label" id="periodBtnLabel">Selecionar período</span>
+          <span class="period-caret">▾</span>
+        </button>
+        <div class="period-pop" id="periodPop" hidden>
+          <div class="pp-body">
+            <div class="pp-presets" id="ppPresets"></div>
+            <div class="pp-cals">
+              <div class="pp-cal" id="ppCalFrom"></div>
+              <div class="pp-cal" id="ppCalTo"></div>
+            </div>
+          </div>
+          <div class="pp-foot">
+            <div class="pp-range" id="ppRange"></div>
+            <div class="pp-actions">
+              <button class="btn" id="ppCancel">Cancelar</button>
+              <button class="btn primary" id="ppApply">Aplicar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn" id="clearBtn">Remover Filtros</button>
+      <div class="sep"></div>
+      <div class="tax-toggle" id="taxToggle"><div class="toggle-track"><div class="toggle-thumb"></div></div><span class="toggle-label" id="taxLabel"></span></div>
+      <button class="btn" id="themeBtn" title="Alternar tema claro/escuro">◐ Tema</button>
+      <div class="spacer"></div>
+      <div class="updated" id="updated"></div>
+      <button class="btn primary" id="refreshBtn"><span class="spin">↻</span> Atualizar Dados</button>
+    </div>
+
+    <div class="page-content">
+      <!-- ===================== PÁGINA 1: VISÃO GERAL ===================== -->
+      <div class="page active" id="page-geral">
+        <h2 class="sec-title">Funil &amp; evolução diária · acumulado de todos os canais</h2>
+        <div class="grid funnel-grid">
+          <div class="card"><div class="funnel" id="geralFunnel"></div>
+            <p class="note">Soma de <b>todos os canais</b> (Meta, Google, TikTok e orgânico/direto). Etapas de Page Views a Checkouts = <b>sessões do GA4</b>; Compras = pedidos distintos e Faturamento = soma dos itens da aba Compras. CAC e ROAS são <b>blended</b> (gasto de mídia paga ÷ todas as compras); CPV e CR usam só os page views dos canais pagos.</p>
+          </div>
+          <div class="panel">
+            <div class="panel-chart"><h3>Evolução diária</h3><p class="hint">Compras (barras) · Gasto (vermelha) · Faturamento (verde) · ROAS (linha preta, eixo próprio).</p><div class="chart-box"><canvas id="gCombo"></canvas></div></div>
+            <div class="tbl-wrap tbl-normal"><table class="dt" id="gDaily"></table></div>
+            <p class="note" style="padding:10px 15px 12px">Heatmap por coluna · último dia no topo · clique numa data para filtrar (Ctrl = várias).</p>
+          </div>
+        </div>
+
+        <div class="chan-prod">
+        <div>
+        <h2 class="sec-title">Resultado por canal</h2>
+        <div class="card" style="padding:0">
+          <div class="tbl-wrap"><table class="dt" id="gChan"></table></div>
+          <p class="note" style="padding:10px 15px">Canal definido por <b>Session source / medium</b> (GA4) e <b>utm_source / utm_medium</b> (Compras): Google Ads = <code>google / cpc</code>; Meta e TikTok = origem da plataforma com mídia paga; o restante = Outros.</p>
+        </div>
+        </div>
+        <div>
+        <h2 class="sec-title">Compras por produto</h2>
+        <div class="card" style="padding:0"><div class="tbl-wrap" style="max-height:300px"><table class="dt" id="gProd"></table></div></div>
+        </div>
+        </div>
+
+        <h2 class="sec-title">Indicadores por dia</h2>
+        <div class="funnel-charts">
+          <div class="card"><h3>CPM e CTR por dia</h3><p class="hint">CPM (R$, esq.) · CTR (%, dir.)</p><div class="chart-box chart-sm"><canvas id="gCpmCtr"></canvas></div></div>
+          <div class="card"><h3>CR e PVR por dia</h3><p class="hint">CR = Page Views/Cliques · PVR = Product View/Page Views</p><div class="chart-box chart-sm"><canvas id="gCrPvr"></canvas></div></div>
+          <div class="card"><h3>ACR e VisCHK por dia</h3><p class="hint">ACR = AddToCart/Product View · VisCHK = Checkouts/AddToCart</p><div class="chart-box chart-sm"><canvas id="gAcrChk"></canvas></div></div>
+          <div class="card"><h3>Conversão em compra por dia</h3><p class="hint">ConvCHK = Compras/Checkouts · Compras/Page View</p><div class="chart-box chart-sm"><canvas id="gConv"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- ===================== PÁGINA 2: CANAL DE MÍDIA (Meta / Google / TikTok) ===================== -->
+      <div class="page" id="page-ch">
+        <div class="card" id="chWait" hidden style="margin-bottom:14px"><b>Aguardando dados do <span id="chWaitName"></span>.</b> A planilha de mídia deste canal ainda não foi conectada (gasto, impressões e cliques aparecem zerados). Funil do GA4 e compras atribuídas ao canal já são exibidos.</div>
+        <div class="card" id="chSelNote" hidden style="margin-bottom:14px">Filtro de campanha/conjunto/anúncio ativo: o GA4 não separa o funil por campanha, então <b>Page Views → Checkouts</b> ficam ocultos. Use <b>Remover Filtros</b> para ver o funil completo do canal.</div>
+        <h2 class="sec-title">Funil &amp; combinação diária · <span class="ch-name"></span></h2>
+        <div class="grid funnel-grid">
+          <div class="card"><div class="funnel" id="metaFunnel"></div>
+            <p class="note">Considera <b>apenas o canal <span class="ch-name"></span></b>: gasto/impressões/cliques da aba de mídia; Page Views a Checkouts = sessões do GA4 com Session source/medium do canal; Compras e Faturamento = compras com UTM do canal.</p>
+          </div>
+          <div class="panel">
+            <div class="panel-chart"><h3>Combinação diária</h3><p class="hint">Compras (barras) · Gasto (vermelha) · Faturamento (verde) · ROAS (linha preta, eixo próprio).</p><div class="chart-box"><canvas id="mCombo"></canvas></div></div>
+            <div class="tbl-wrap tbl-normal"><table class="dt" id="tDaily"></table></div>
+            <p class="note" style="padding:10px 15px 12px">Heatmap por coluna · último dia no topo · clique numa data para filtrar (Ctrl = várias).</p>
+          </div>
+        </div>
+
+        <h2 class="sec-title">Indicadores por dia</h2>
+        <div class="funnel-charts">
+          <div class="card"><h3>CPM e CTR por dia</h3><p class="hint">CPM (R$, esq.) · CTR (%, dir.)</p><div class="chart-box chart-sm"><canvas id="mCpmCtr"></canvas></div></div>
+          <div class="card"><h3>CR e PVR por dia</h3><p class="hint">CR = Page Views/Cliques · PVR = Product View/Page Views</p><div class="chart-box chart-sm"><canvas id="mCrPvr"></canvas></div></div>
+          <div class="card"><h3>ACR e VisCHK por dia</h3><p class="hint">ACR = AddToCart/Product View · VisCHK = Checkouts/AddToCart</p><div class="chart-box chart-sm"><canvas id="mAcrChk"></canvas></div></div>
+          <div class="card"><h3>Conversão em compra por dia</h3><p class="hint">ConvCHK = Compras/Checkouts · Compras/Page View</p><div class="chart-box chart-sm"><canvas id="mConv"></canvas></div></div>
+        </div>
+
+        <h2 class="sec-title">Compras por produto <span class="ch-name"></span></h2>
+        <div class="funnel-charts">
+          <div class="card" style="padding:0"><div class="tbl-wrap" style="max-height:260px"><table class="dt" id="mProd"></table></div></div>
+          <div class="card" id="adBlock"><h3>Faturamento por anúncio</h3><p class="hint">Top 10 · utm_content</p><div class="chart-box chart-sm"><canvas id="mContent"></canvas></div></div>
+        </div>
+
+        <h2 class="sec-title">Otimização · Campanha → Conjunto/Grupo → Anúncio</h2>
+        <div class="table-chart-pair">
+          <div class="thead-title"><span>Campanhas</span><input type="text" class="tbl-search" id="searchCamp" placeholder="Buscar campanha..."><button class="btn-mini" id="clearCampBtn" title="Remover só o filtro de campanha">✕ Filtro</button></div>
+          <div class="tbl-wrap tbl-normal"><table class="dt" id="tCamp"></table></div>
+          <div class="pair-chart"><div class="pc-title">CAC por campanha, por dia</div><canvas id="chCamp"></canvas></div>
+        </div>
+        <div class="table-chart-pair">
+          <div class="thead-title"><span id="adsetTitle">Conjuntos (Ad Sets)</span><input type="text" class="tbl-search" id="searchAdset" placeholder="Buscar conjunto/grupo..."><button class="btn-mini" id="clearAdsetBtn" title="Remover só o filtro de conjunto">✕ Filtro</button></div>
+          <div class="tbl-wrap tbl-normal"><table class="dt" id="tAdset"></table></div>
+          <div class="pair-chart"><div class="pc-title">CAC por conjunto/grupo, por dia</div><canvas id="chAdset"></canvas></div>
+        </div>
+        <div class="table-chart-pair" id="adTableBlock">
+          <div class="thead-title"><span>Anúncios</span><input type="text" class="tbl-search" id="searchAd" placeholder="Buscar anúncio..."><button class="btn-mini" id="clearAdBtn" title="Remover só o filtro de anúncio">✕ Filtro</button></div>
+          <div class="tbl-wrap tbl-double"><table class="dt" id="tAd"></table></div>
+          <div class="pair-chart"><div class="pc-title">CAC por anúncio, por dia</div><canvas id="chAd"></canvas></div>
+        </div>
+        <p class="note">Campanha/conjunto/anúncio vêm da aba de mídia; as compras são atribuídas por <b>utm_campaign</b> (e utm_content no Meta). O funil do GA4 não existe nesse nível, por isso as tabelas mostram mídia + compras.</p>
+
+        <h2 class="sec-title">Compradores <span class="pill q" id="qCount"></span></h2>
+        <div class="card" style="padding:0">
+          <div class="tbl-wrap" style="max-height:360px"><table class="dt" id="tQual"></table></div>
+          <p class="note" style="padding:10px 15px">E‑mail <b>mascarado</b> (página pública). Últimos pedidos atribuídos ao canal.</p>
+        </div>
+      </div>
+
+      <!-- ===================== PÁGINA 3: INSIGHTS DE IA (relatórios) ===================== -->
+      <div class="page" id="page-rel">
+        <div class="rel-head">
+          <div>
+            <h2 class="rel-title">Relatório · <span id="relPeriodName">Período</span></h2>
+            <p class="rel-sub" id="relPeriodRange"></p>
+          </div>
+          <div class="rel-legend">
+            <span class="rel-legend-lbl">Metas (CAC/ROAS):</span>
+            <span class="rel-chip c-red">Muito abaixo</span>
+            <span class="rel-chip c-yellow">Pouco abaixo</span>
+            <span class="rel-chip c-green">Na meta / acima</span>
+            <span class="rel-chip c-cyan">Muito acima</span>
+          </div>
+        </div>
+
+        <h2 class="sec-title">Saúde do funil</h2>
+        <div class="health-card">
+          <div class="health-gauge">
+            <div class="health-ring" id="healthRing">
+              <div class="health-ring-inner">
+                <div class="health-score" id="healthScore">--</div>
+                <div class="health-score-lbl">de 100</div>
+              </div>
+            </div>
+          </div>
+          <div class="health-body">
+            <div class="health-top">
+              <h3 class="health-title">Saúde do funil</h3>
+              <span class="health-badge" id="healthBadge">--</span>
+              <span class="health-desc" id="healthDesc">ancorado na meta de CAC</span>
+            </div>
+            <div class="health-goal">
+              <label for="healthGoalInput">Meta de CAC</label>
+              <div class="health-goal-input"><span id="healthGoalCur">R$</span><input type="number" id="healthGoalInput" min="0" step="0.01" inputmode="decimal"></div>
+              <span class="health-goal-hint">as demais metas usam o histórico da conta</span>
+            </div>
+            <div class="health-bars" id="healthBars"></div>
+          </div>
+        </div>
+        <p class="note" id="healthNote">A saúde combina o <b>ROAS</b> (lucratividade — meta em <code>build/config.py</code>, maior peso da nota: um funil só é saudável se dá lucro) com o <b>CAC</b> (meta editável ao lado) e os pisos de conversão de cada etapa — <b>CTR</b>, <b>CR</b> (Page Views/Cliques), <b>VisCHK</b> (Checkouts/AddToCart) e <b>ConvCHK</b> (Compras/Checkouts) — estipulados a partir do histórico da conta (85% da taxa histórica).</p>
+
+        <h2 class="sec-title">Visão por campanha</h2>
+        <div class="card" style="padding:0">
+          <div class="tbl-wrap"><table class="dt rel-dt" id="relCamp"></table></div>
+          <p class="note" style="padding:10px 15px">Nome completo da campanha · canais de mídia paga. CAC/ROAS com código de cor conforme a meta.</p>
+        </div>
+
+        <h2 class="sec-title">Anúncios · destaques e alertas</h2>
+        <div class="rel-ads-grid">
+          <div class="card" style="padding:0">
+            <div class="rel-ads-head good">▲ Top 5 anúncios</div>
+            <div class="tbl-wrap"><table class="dt rel-dt" id="relTop"></table></div>
+          </div>
+          <div class="card" style="padding:0">
+            <div class="rel-ads-head bad">▼ Piores 5 anúncios</div>
+            <div class="tbl-wrap"><table class="dt rel-dt" id="relWorst"></table></div>
+          </div>
+        </div>
+        <p class="note">Ranqueados por ROAS (e CAC como desempate) entre anúncios com gasto relevante no período. Top 5 exige um mínimo de 3 compras no período. Só anúncios com nome (Meta); Google Ads não tem nível de anúncio na planilha.</p>
+
+        <h2 class="sec-title">Visão geral</h2>
+        <div class="rel-ov">
+          <div class="rel-ov-block">
+            <div class="rel-ov-head">Visão Geral Total <span>todos os canais</span></div>
+            <div class="rel-cards" id="relCardsTotal"></div>
+          </div>
+          <div class="rel-ov-block">
+            <div class="rel-ov-head">Visão Geral Tráfego <span>mídia paga (Meta + Google + TikTok)</span></div>
+            <div class="rel-cards" id="relCardsAds"></div>
+          </div>
+        </div>
+
+        <h2 class="sec-title">Briefing do Gestor</h2>
+        <div class="rel-brief" id="relBrief"></div>
+        <p class="note" id="relBriefStamp"></p>
+      </div>
+
+      <div class="foot">Atualizado automaticamente a cada ~30 min via GitHub Actions + cron‑job.org. Somente leitura das planilhas. <span id="buildFoot2"></span></div>
+    </div>
+  </div>
+</div>
+
+<script id="payload" type="application/json">__DATA_JSON__</script>
+<script>__APP_JS__</script>
+</body>
+</html>
