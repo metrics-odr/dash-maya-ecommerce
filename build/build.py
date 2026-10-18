@@ -355,8 +355,10 @@ def load_sales(rows, media):
          "status": ["status"]},
         {"created": 0, "name": 1, "email": 2, "prod": 4, "val": 5, "order": 11})
     # campanha (normalizada) -> (canal, nome real) vindo das abas de mídia; ambígua entre canais = ignora
-    camp_map, ad_map = {}, {}
+    camp_map, ad_map, adname_map = {}, {}, {}
     for m in media:
+        if m["ch"] == "meta" and m["ad"] != "(sem anúncio)":
+            adname_map.setdefault(norm(m["ad"]), set()).add((m["camp"], m["adset"]))
         k = norm(m["camp"])
         if k in camp_map and camp_map[k][0] != m["ch"]:
             camp_map[k] = (None, m["camp"])
@@ -384,8 +386,12 @@ def load_sales(rows, media):
             hit = camp_map.get(norm(utm_camp)) if utm_camp else None
             if hit and hit[0]:
                 ch, camp = hit[0], hit[1]          # campanha real da plataforma manda no canal
-            adset = ""
-            if ch == "meta":
+            elif utm_ad and len(adname_map.get(norm(utm_ad), ())) == 1:
+                # sem campanha reconhecível, mas utm_content = Ad Name único do Meta: herda campanha/conjunto
+                ch = "meta"
+                camp, adset_hit = next(iter(adname_map[norm(utm_ad)]))
+            adset = adset_hit if (ch == "meta" and not hit and utm_ad and len(adname_map.get(norm(utm_ad), ())) == 1) else ""
+            if ch == "meta" and not adset:
                 adset = ad_map.get((norm(camp), norm(utm_ad))) or _clean_utm(cell(row, sidx["utm_medium"]))
             order_attr[oid] = {"d": parse_date(cell(row, sidx["created"])), "ch": ch, "camp": camp,
                                "adset": adset or "(sem conjunto)",
