@@ -439,7 +439,7 @@ function renderGeral(){
     const f=r=>r.ch===ch, x=totals(S.fS.filter(f),S.fM.filter(f),S.fG.filter(f)), dv=derive(x);
     return {k:ch, cells:{dim:CH_LABEL[ch], gasto:dv.gasto, cliques:x.cl, pv:x.pv, ck:x.ck, vendas:x.vendas, cac:dv.cac, fat:x.fat, ticket:dv.ticket, roas:dv.roas, share:t.fat?x.fat/t.fat:null}};
   });
-  renderTable({id:'gChan', cols:[{key:'dim',label:'Canal',type:'dim',big:true},
+  renderTable({id:'gChan', cols:[{key:'dim',label:'Canal',type:'dim',w:130},
       {key:'gasto',label:'Gasto',type:'brl'},{key:'cliques',label:'Cliques',type:'int'},{key:'pv',label:'Page Views',type:'int'},
       {key:'ck',label:'Checkouts',type:'int'},{key:'vendas',label:'Compras',type:'int',heat:'vendas'},{key:'cac',label:'CAC',type:'brl'},
       {key:'fat',label:'Faturamento',type:'brl',heat:'fat',w:120},{key:'ticket',label:'Ticket',type:'brl'},{key:'roas',label:'ROAS',type:'roas'},
