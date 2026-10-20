@@ -123,10 +123,17 @@ function geralMatch(r){
   if(STATE.gTraf==='organico' && paid) return false;
   return STATE.gSrc==='todos' || (r.src||r.ch)===STATE.gSrc;
 }
+function gfCloseAll(){ document.querySelectorAll('.gf-menu').forEach(m=>{ m.hidden=true; const b=m.parentElement.querySelector('.gf-btn'); if(b) b.setAttribute('aria-expanded','false'); }); }
+document.addEventListener('click',gfCloseAll);
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') gfCloseAll(); });
 function renderGeralFilters(){
   const mk=(id,opts,key)=>{ const el=document.getElementById(id); if(!el) return;
-    el.innerHTML=opts.map(([v,l])=>`<option value="${v}"${STATE[key]===v?' selected':''}>${l}</option>`).join('');
-    el.onchange=()=>{ STATE[key]=el.value; renderAll(); }; };
+    const cur=(opts.find(o=>o[0]===STATE[key])||opts[0])[1];
+    el.innerHTML=`<button type="button" class="btn gf-btn" aria-haspopup="true" aria-expanded="false"><span>${cur}</span><span class="period-caret">▾</span></button>`+
+      `<div class="gf-menu" hidden>${opts.map(([v,l])=>`<button type="button" class="pp-preset${STATE[key]===v?' active':''}" data-v="${v}">${l}</button>`).join('')}</div>`;
+    const btn=el.querySelector('.gf-btn'), menu=el.querySelector('.gf-menu');
+    btn.onclick=e=>{ e.stopPropagation(); const open=menu.hidden; gfCloseAll(); if(open){ menu.hidden=false; btn.setAttribute('aria-expanded','true'); } };
+    menu.onclick=e=>{ e.stopPropagation(); const b=e.target.closest('[data-v]'); if(b){ STATE[key]=b.dataset.v; renderAll(); } }; };
   mk('gfTraf',G_TRAF,'gTraf'); mk('gfSrc',G_SRC,'gSrc');
 }
 
