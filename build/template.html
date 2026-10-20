@@ -81,7 +81,7 @@
             <p class="note">Soma de <b>todos os canais</b> (Meta, Google, TikTok e orgânico/direto). Etapas de Page Views a Checkouts = <b>sessões do GA4</b>; Compras = pedidos distintos e Faturamento = soma dos itens da aba Compras. CAC e ROAS são <b>blended</b> (gasto de mídia paga ÷ todas as compras); CPV e CR usam só os page views dos canais pagos.</p>
           </div>
           <div class="panel">
-            <div class="panel-chart"><h3>Evolução diária</h3><p class="hint">Compras (barras) · Gasto (vermelha) · Faturamento (verde) · ROAS (linha preta, eixo próprio).</p><div class="chart-box"><canvas id="gCombo"></canvas></div></div>
+            <div class="panel-chart"><div class="chart-head"><div><h3 id="gComboTitle">Evolução diária</h3><p class="hint">Compras (barras) · Gasto (vermelha) · Faturamento (verde) · ROAS (linha preta, eixo próprio).</p></div><div class="gf-dd" id="gComboGran"></div></div><div class="chart-box"><canvas id="gCombo"></canvas></div></div>
             <div class="tbl-wrap tbl-normal"><table class="dt" id="gDaily"></table></div>
             <p class="note" style="padding:10px 15px 12px">Heatmap por coluna · último dia no topo · clique numa data para filtrar (Ctrl = várias).</p>
           </div>
@@ -120,7 +120,7 @@
             <p class="note">Considera <b>apenas o canal <span class="ch-name"></span></b>: gasto/impressões/cliques da aba de mídia; Page Views a Checkouts = sessões do GA4 com Session source/medium do canal; Compras e Faturamento = compras com UTM do canal.</p>
           </div>
           <div class="panel">
-            <div class="panel-chart"><h3>Combinação diária</h3><p class="hint">Compras (barras) · Gasto (vermelha) · Faturamento (verde) · ROAS (linha preta, eixo próprio).</p><div class="chart-box"><canvas id="mCombo"></canvas></div></div>
+            <div class="panel-chart"><div class="chart-head"><div><h3 id="mComboTitle">Evolução diária</h3><p class="hint">Compras (barras) · Gasto (vermelha) · Faturamento (verde) · ROAS (linha preta, eixo próprio).</p></div><div class="gf-dd" id="mComboGran"></div></div><div class="chart-box"><canvas id="mCombo"></canvas></div></div>
             <div class="tbl-wrap tbl-normal"><table class="dt" id="tDaily"></table></div>
             <p class="note" style="padding:10px 15px 12px">Heatmap por coluna · último dia no topo · clique numa data para filtrar (Ctrl = várias).</p>
           </div>
@@ -206,6 +206,12 @@
           </div>
         </div>
         <p class="note" id="healthNote">A saúde combina o <b>ROAS</b> (lucratividade — meta em <code>build/config.py</code>, maior peso da nota: um funil só é saudável se dá lucro) com o <b>CAC</b> (meta editável ao lado) e os pisos de conversão de cada etapa — <b>CTR</b>, <b>CR</b> (Page Views/Cliques), <b>VisCHK</b> (Checkouts/AddToCart) e <b>ConvCHK</b> (Compras/Checkouts) — estipulados a partir do histórico da conta (85% da taxa histórica).</p>
+
+        <h2 class="sec-title">Evolução no período</h2>
+        <div class="card rel-evo">
+          <div class="chart-head"><div><h3 id="relComboTitle">Evolução diária</h3><p class="hint">Compras (barras) · Gasto (vermelha) · Faturamento (verde) · ROAS (linha preta, eixo próprio).</p></div><div class="gf-dd" id="relComboGran"></div></div>
+          <div class="chart-box"><canvas id="relCombo"></canvas></div>
+        </div>
 
         <h2 class="sec-title">Visão por campanha</h2>
         <div class="card" style="padding:0">

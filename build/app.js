@@ -34,6 +34,7 @@ const TODAY = B.today || B.date_max;
 /* ---------------- STATE ---------------- */
 const STATE = {
   page:'geral', from:B.date_min, to:B.date_max, preset:'todo', tax:true,
+  gran:{gCombo:'dia',mCombo:'dia',relCombo:'dia'},   /* granularidade de cada gráfico de evolução */
   selDays:new Set(), gTraf:'todos', gSrc:'todos',   /* filtros da Visão Geral: tráfego (pago/organico) e canal (utm_source) */
   mSelC:new Set(), mSelA:new Set(), mSelAd:new Set(),
   sort:{}, colw: (()=>{ try{ return JSON.parse(localStorage.getItem('dm_colw')||'{}'); }catch(e){ return {}; } })(),
@@ -94,6 +95,24 @@ function daily(fS,fM,fG){
 }
 const inRange=(d,a,b)=>d&&d>=a&&d<=b;
 
+/* Granularidade dos gráficos de evolução: agrega as linhas diárias em semana/mês/trimestre/semestre/ano. */
+const GRANS=[['dia','Diário','diária'],['semana','Semanal','semanal'],['mes','Mensal','mensal'],['tri','Trimestral','trimestral'],['sem','Semestral','semestral'],['ano','Anual','anual']];
+function granKey(d,g){
+  const y=+d.slice(0,4), m=+d.slice(5,7), yy=d.slice(2,4);
+  if(g==='semana'){ const dt=new Date(d+'T00:00:00Z'); dt.setUTCDate(dt.getUTCDate()-(dt.getUTCDay()+6)%7); const s=dt.toISOString().slice(0,10); return [s,s.slice(8)+'/'+s.slice(5,7)]; }
+  if(g==='mes') return [d.slice(0,7), pad(m)+'/'+yy];
+  if(g==='tri'){ const q=Math.ceil(m/3); return [y+'-'+q, 'T'+q+'/'+yy]; }
+  if(g==='sem'){ const h=m<=6?1:2; return [y+'-'+h, 'S'+h+'/'+yy]; }
+  return [String(y), String(y)];
+}
+function rollup(dd,g){
+  if(!g||g==='dia') return dd.map(x=>Object.assign({lbl:x.d.slice(5)},x));
+  const out={};
+  dd.forEach(x=>{ const [k,l]=granKey(x.d,g); const o=out[k]||(out[k]=Object.assign({d:k,lbl:l},newBucket()));
+    Object.keys(newBucket()).forEach(f=>{ o[f]+=x[f]; }); });
+  return Object.values(out).sort((a,b)=>a.d<b.d?-1:1);
+}
+
 /* Escopo de dados de uma página. ch=null -> todos os canais (Visão Geral); ch='meta'|'google'|'tiktok'
    -> só aquele canal, com o drill-down Campanha→Conjunto→Anúncio (`ex` = dimensão a NÃO filtrar,
    para a própria tabela mostrar todas as suas linhas). win = janela custom (período anterior).
@@ -135,6 +154,17 @@ function renderGeralFilters(){
     btn.onclick=e=>{ e.stopPropagation(); const open=menu.hidden; gfCloseAll(); if(open){ menu.hidden=false; btn.setAttribute('aria-expanded','true'); } };
     menu.onclick=e=>{ e.stopPropagation(); const b=e.target.closest('[data-v]'); if(b){ STATE[key]=b.dataset.v; renderAll(); } }; };
   mk('gfTraf',G_TRAF,'gTraf'); mk('gfSrc',G_SRC,'gSrc');
+}
+/* dropdown de granularidade (Diário/Semanal/…) no canto do card do gráfico; `chartId` = canvas */
+function renderGranDD(chartId){
+  const el=document.getElementById(chartId+'Gran'); if(!el) return;
+  const cur=GRANS.find(g=>g[0]===STATE.gran[chartId])||GRANS[0];
+  const title=document.getElementById(chartId+'Title'); if(title) title.textContent='Evolução '+cur[2];
+  el.innerHTML=`<button type="button" class="btn gf-btn" aria-haspopup="true" aria-expanded="false"><span>${cur[1]}</span><span class="period-caret">▾</span></button>`+
+    `<div class="gf-menu" hidden>${GRANS.map(g=>`<button type="button" class="pp-preset${cur[0]===g[0]?' active':''}" data-v="${g[0]}">${g[1]}</button>`).join('')}</div>`;
+  const btn=el.querySelector('.gf-btn'), menu=el.querySelector('.gf-menu');
+  btn.onclick=e=>{ e.stopPropagation(); const open=menu.hidden; gfCloseAll(); if(open){ menu.hidden=false; btn.setAttribute('aria-expanded','true'); } };
+  menu.onclick=e=>{ e.stopPropagation(); const b=e.target.closest('[data-v]'); if(b){ STATE.gran[chartId]=b.dataset.v; renderAll(); } };
 }
 
 /* ---------------- generic interactive table ---------------- */
@@ -239,7 +269,8 @@ const FMT={brl:brl,pct:pct,num:numf,int:intf,roas:roasf};
 /* combo: Compras (barras) · Gasto/Faturamento (R$) · ROAS (eixo próprio) */
 function comboChart(id, d){
   destroy(id); const el=document.getElementById(id); if(!el) return;
-  const labels=d.map(x=>x.d.slice(5)), mut=cmuted(), gr=cgrid();
+  d=rollup(d, STATE.gran[id]);
+  const labels=d.map(x=>x.lbl), mut=cmuted(), gr=cgrid();
   charts[id]=new Chart(el,{
     data:{labels, datasets:[
       {type:'bar',label:'Compras',data:d.map(x=>x.vendas),backgroundColor:cvar('--chart-vendas'),yAxisID:'y',borderRadius:3,order:3},
@@ -492,7 +523,7 @@ function renderGeral(){
   const dd=daily(S.fS,S.fM,S.fG);
   renderFunnel('geralFunnel', funnelSteps(t, tp, false), dd);
   convCharts(['gCpmCtr','gCrPvr','gAcrChk','gConv'], dd);
-  comboChart('gCombo', dd);
+  renderGranDD('gCombo'); comboChart('gCombo', dd);
   renderProdTable('gProd', S.fS);
 
   /* resumo por canal */
@@ -559,7 +590,7 @@ function renderChannel(){
   renderFunnel('metaFunnel', funnelSteps(t, tp, S.sel), dd);
 
   convCharts(['mCpmCtr','mCrPvr','mAcrChk','mConv'], dd);
-  comboChart('mCombo', dd);
+  renderGranDD('mCombo'); comboChart('mCombo', dd);
   const aggAd=buildAgg(S.fS,S.fM,'ad');
   const realAds=Object.entries(aggAd).filter(([n])=>n!=='(sem anúncio)');
   document.getElementById('adBlock').hidden=!realAds.length;
@@ -749,6 +780,7 @@ function renderRelatorios(){
   relCards('relCardsTotal',tTot);
   relCards('relCardsAds',tAds);
   renderHealthCard(dvT);
+  renderGranDD('relCombo'); comboChart('relCombo', daily(S.fS,S.fM,S.fG));
 
   /* visão por campanha (canais de mídia paga) */
   const keyCamp=r=>r.ch+'\u0001'+r.camp, byC={};

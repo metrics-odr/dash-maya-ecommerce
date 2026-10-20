@@ -104,6 +104,10 @@
   .gf-menu{position:absolute; top:calc(100% + 6px); right:0; z-index:60; min-width:100%; display:flex; flex-direction:column; gap:3px; padding:8px;
     background:var(--surface); border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 40px rgba(0,0,0,.28)}
   .gf-menu[hidden]{display:none}
+  .chart-head{display:flex; justify-content:space-between; align-items:flex-start; gap:12px}
+  .chart-head h3{margin:0 0 2px; font-size:14px}
+  .chart-head .hint{font-size:12px; color:var(--muted); margin:0 0 8px}
+  .chart-head .gf-btn{min-width:112px}
 
   .grid{display:grid; gap:16px}
   .two-col{grid-template-columns:380px 1fr}
