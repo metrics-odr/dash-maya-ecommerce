@@ -186,7 +186,7 @@ function renderTable(cfg){
       va=(va==null||!isFinite(va))?-Infinity:va; vb=(vb==null||!isFinite(vb))?-Infinity:vb;
       return dir==='asc'?va-vb:vb-va; }); }
   const ext={};
-  cfg.cols.forEach(c=>{ if(c.heat){ const vs=rows.map(r=>r.cells[c.key]).filter(v=>v!=null&&isFinite(v)); ext[c.key]=[Math.min(...vs),Math.max(...vs)]; }});
+  cfg.cols.forEach(c=>{ if(heatCol(c)){ const vs=rows.map(r=>r.cells[c.key]).filter(v=>v!=null&&isFinite(v)); ext[c.key]=[Math.min(...vs),Math.max(...vs)]; }});
   const fmt=(t,v)=> t==='brl'?brl(v):t==='pct'?pct(v):t==='int'?intf(v):t==='num'?numf(v):t==='roas'?roasf(v):t==='date'?brdate(v):dimf(v);
   const widths=cfg.cols.map(c=>colWidth(cfg,c)); const totalW=widths.reduce((a,b)=>a+b,0);
   const colgroup='<colgroup>'+cfg.cols.map((c,i)=>`<col style="width:${widths[i]}px">`).join('')+'</colgroup>';
@@ -198,7 +198,7 @@ function renderTable(cfg){
     const sel = cfg.selectable && cfg.selSet && cfg.selSet.has(r.k);
     const tds=cfg.cols.map((c,ci)=>{
       const v=r.cells[c.key]; let bg='';
-      if(c.heat && ext[c.key]) bg=`background:${heat(v,ext[c.key][0],ext[c.key][1],c.heat)}`;
+      if(heatCol(c) && ext[c.key]) bg=`background:${heat(v,ext[c.key][0],ext[c.key][1])}`;
       const cls=(c.type==='dim'?'dim':'');
       const dot = (ci===0 && cfg.statusMap) ? statusDot(cfg.statusMap[r.k]) : '';
       return `<td class="${cls}" style="${bg}">${dot}${fmt(c.type,v)}</td>`;
@@ -244,13 +244,13 @@ function statusDot(active){
   if(active==null) return '';
   return active ? '<span class="status-dot on" title="Ativo"></span>' : '<span class="status-dot off" title="Pausado"></span>';
 }
-/* Heatmap por coluna: cor FIXA por métrica (definida em identidade-visual.css),
-   só a OPACIDADE varia com o valor (maior valor = mais vibrante). */
-const HEAT_HUE={gasto:'--heat-gasto', fat:'--heat-fat', roas:'--heat-roas', vendas:'--heat-vendas'};
-function heat(v,lo,hi,kind){
-  if(v==null||!isFinite(v)||hi===lo||!HEAT_HUE[kind]) return 'transparent';
+/* Heatmap por coluna: UMA cor só para todas as colunas numéricas (--heat-unico em
+   identidade-visual.css); só a OPACIDADE varia com o valor (maior = mais vibrante). */
+const heatCol=c=>c.type!=='dim'&&c.type!=='date';
+function heat(v,lo,hi){
+  if(v==null||!isFinite(v)||hi===lo) return 'transparent';
   const t=Math.max(0,Math.min(1,(v-lo)/(hi-lo)));
-  const c=hx2rgb(cvar(HEAT_HUE[kind]));
+  const c=hx2rgb(cvar('--heat-unico'));
   return `rgba(${c[0]},${c[1]},${c[2]},${(0.06+0.5*t).toFixed(3)})`;
 }
 function toggleSet(set,key,ctrl){

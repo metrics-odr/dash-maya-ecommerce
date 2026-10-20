@@ -22,7 +22,7 @@
   --chart-cpm:#D6455D; --chart-ctr:#6B4E9B; --chart-cr:#6B4E9B;
   --chart-vischk:#1E9E5A; --chart-convlp:#E0A030;
   /* heatmap por coluna */
-  --heat-gasto:#D6455D; --heat-fat:#1E9E5A; --heat-roas:#E0A030; --heat-vendas:#6B4E9B;
+  --heat-gasto:#D6455D; --heat-fat:#1E9E5A; --heat-roas:#E0A030; --heat-vendas:#6B4E9B; --heat-unico:#6B4E9B;
   /* tags/pills de valor */
   --pill-cac:#6B4E9B; --pill-cac-bg:rgba(107,78,155,.10);
   --pill-roas:#B7791F; --pill-roas-bg:rgba(183,121,31,.12);
@@ -65,7 +65,7 @@
   --chart-cpm:#F5B942; --chart-ctr:#D9B4F0; --chart-cr:#B07FD0;
   --chart-vischk:#3DD68C; --chart-convlp:#F5B942;
   /* heatmap por coluna */
-  --heat-gasto:#FF6B81; --heat-fat:#3DD68C; --heat-roas:#F5B942; --heat-vendas:#B07FD0;
+  --heat-gasto:#FF6B81; --heat-fat:#3DD68C; --heat-roas:#F5B942; --heat-vendas:#B07FD0; --heat-unico:#B07FD0;
   /* tags/pills de valor */
   --pill-cac:#D9B4F0; --pill-cac-bg:rgba(217,180,240,.14);
   --pill-roas:#FBBF24; --pill-roas-bg:rgba(251,191,36,.14);
