@@ -362,8 +362,10 @@ function deltaBadge(cur,prev,key){
   const cls=flat?'flat':(good?'good':'bad'), arrow=flat?'→':(up?'▲':'▼');
   return `<span class="delta ${cls}">${arrow} ${nf1.format(Math.abs(p))}%</span>`;
 }
-/* sparkline (SVG) da série diária de uma etapa; sem dados suficientes -> vazio */
-function spark(vals){
+/* sparkline (SVG) da série diária de uma etapa; sem dados suficientes -> vazio.
+   dates/fmt alimentam o tooltip ao passar o mouse (ver initSparkTip) */
+const SPARKS=[];
+function spark(vals,dates,fmt){
   const v=vals.map(x=>(x==null||!isFinite(x))?null:x), n=v.length, nums=v.filter(x=>x!=null);
   if(!nums.length) return '<svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none"></svg>';
   const mn=Math.min(...nums), mx=Math.max(...nums), rg=(mx-mn)||1;
@@ -372,15 +374,46 @@ function spark(vals){
   const line=pts.map((q,i)=>(i?'L':'M')+q[0].toFixed(1)+' '+q[1].toFixed(1)).join(' ');
   const last=pts[pts.length-1];
   const area=pts.length>1?`<path d="${line} L${last[0].toFixed(1)} 30 L${pts[0][0].toFixed(1)} 30 Z" class="spark-area"/>`:'';
-  return `<svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none">${area}<path d="${line}" class="spark-line"/></svg>`;
+  const sid=SPARKS.push({v,dates:dates||[],fmt:fmt||numf,X,Y})-1;
+  return `<svg class="spark" data-sp="${sid}" viewBox="0 0 100 30" preserveAspectRatio="none">${area}<path d="${line}" class="spark-line"/></svg>`;
 }
+/* tooltip discreto das sparklines: data, dia da semana e valor do ponto sob o mouse */
+function initSparkTip(){
+  const tip=document.createElement('div'); tip.className='spark-tip';
+  const dot=document.createElement('div'); dot.className='spark-dot';
+  document.body.appendChild(tip); document.body.appendChild(dot);
+  const hide=()=>{ tip.style.display='none'; dot.style.display='none'; };
+  document.addEventListener('mousemove',e=>{
+    const svg=e.target.closest&&e.target.closest('svg.spark[data-sp]');
+    if(!svg) return hide();
+    const sp=SPARKS[+svg.dataset.sp]; if(!sp) return hide();
+    const r=svg.getBoundingClientRect(), n=sp.v.length;
+    const fx=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width));
+    let i=n>1?Math.round(fx*(n-1)):0;
+    if(sp.v[i]==null){ let best=-1; sp.v.forEach((x,j)=>{ if(x!=null&&(best<0||Math.abs(j-i)<Math.abs(best-i))) best=j; }); i=best; }
+    if(i<0||sp.v[i]==null) return hide();
+    const d=sp.dates[i];
+    tip.innerHTML=`<b>${d?brdate(d):''}</b>${d?' · '+weekday(d):''}<span>${sp.fmt(sp.v[i])}</span>`;
+    tip.style.display='block';
+    const px=r.left+sp.X(i)/100*r.width, py=r.top+sp.Y(sp.v[i])/30*r.height;
+    dot.style.left=px+'px'; dot.style.top=py+'px'; dot.style.display='block';
+    const tw=tip.offsetWidth, th=tip.offsetHeight;
+    tip.style.left=Math.max(4,Math.min(innerWidth-tw-4,px-tw/2))+'px';
+    tip.style.top=Math.max(4,py-th-10)+'px';
+  });
+  document.addEventListener('mouseleave',hide);
+  window.addEventListener('scroll',hide,true);
+}
+initSparkTip();
 /* funil horizontal: KPIs (Gasto/Faturamento/ROAS/Ticket) + etapas em linha, com a taxa de conversão entre elas */
 function renderFunnel(id, steps, dd){
   dd=dd||[];
   const st={}; steps.forEach(s=>st[s[3]]=s);
   const ser={gasto:x=>x.sp, impr:x=>x.im, cl:x=>x.cl, pv:x=>x.pv, vi:x=>x.vi, atc:x=>x.atc, ck:x=>x.ck, vendas:x=>x.vendas, fat:x=>x.fat,
     roas:x=>x.sp?x.fat/x.sp:null, ticket:x=>x.vendas?x.fat/x.vendas:null};
-  const sp=k=>spark(dd.map(ser[k]));
+  const fm={gasto:brl,fat:brl,ticket:brl,roas:roasf,impr:intf,cl:intf,pv:intf,vi:intf,atc:intf,ck:intf,vendas:intf};
+  const dates=dd.map(x=>x.d);
+  const sp=k=>spark(dd.map(ser[k]),dates,fm[k]);
   const sec=(s,i)=>s[2][i]||['',''];
   const pill=x=>`<span class="s-val${x[2]?' s-pill '+x[2]:''}">${x[1]}</span>`;
   const kpi=(label,val,key,delta,cls,tone)=>`<div class="fk${tone?' tint t-'+tone:''}"><div class="fk-label">${label}</div><div class="fk-val ${cls||''}">${val}</div>${delta?`<div class="m-delta">${delta}</div>`:''}${sp(key)}</div>`;

@@ -164,6 +164,10 @@
   .spark{display:block; width:100%; height:34px; margin:8px 0 2px; overflow:visible}
   .spark-line{fill:none; stroke:var(--accent-blue); stroke-width:1.6; vector-effect:non-scaling-stroke; stroke-linejoin:round}
   .spark-area{fill:var(--accent-blue); opacity:.14; stroke:none}
+  .spark-tip{position:fixed; display:none; z-index:9999; pointer-events:none; padding:3px 7px; border-radius:6px; font-size:11px; line-height:1.3; white-space:nowrap; background:var(--surface); color:var(--ink); border:1px solid var(--border); box-shadow:0 2px 8px rgba(0,0,0,.3); opacity:.96}
+  .spark-tip span{display:block; font-weight:700; font-size:12px; font-variant-numeric:tabular-nums}
+  .spark-dot{position:fixed; display:none; z-index:9998; pointer-events:none; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%; background:var(--accent-blue); border:1.5px solid var(--surface)}
+  .tint .spark-dot{background:var(--t)}
   @media(max-width:1100px){
     .fnl-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
     .fnl-steps{overflow-x:auto; padding-bottom:6px}
