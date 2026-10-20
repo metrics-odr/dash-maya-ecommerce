@@ -101,6 +101,10 @@ ligar: preencher o GID em `build/config.py`.
   **Preço** de todos os itens. Todas as compras contam (não há "produto principal"). Atribuição: canal
   pelo UTM; se `utm_campaign` bate com uma campanha das abas de mídia, a compra herda canal e nome
   reais da plataforma. `utm_content` só vira anúncio no Meta (Ad Name).
+- **Palavras-chave (só página Google Ads)**: tabela "Palavras-chave" (+ gráfico de CAC por dia) que cruza a
+  coluna de keyword da aba Google Ads (`Keyword`/`Palavra-chave`, campo `kw` em `media[]`) com o **utm_term** das
+  compras (campo `kw` em `sales[]`, só canal Google). A chave é normalizada em `_clean_kw` (minúscula, sem `[ ] " +`);
+  sem utm_term/keyword = "(sem palavra-chave)". Respeita período e campanha selecionada (não conjunto/anúncio).
 - **Métricas**: CPM · CTR · CPC · CR (Page Views pagos/Cliques) · CPV · PVR (Product View/Page Views) · CPPV ·
   ACR (AddToCart/Product View) · CPAC · VisCHK (Checkouts/AddToCart) · CPIC · ConvCHK (Compras/Checkouts) ·
   CAC (Gasto/Compras) · Ticket Médio · ROAS (Faturamento/Gasto). Na Visão Geral, CAC/ROAS são *blended*

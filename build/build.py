@@ -260,6 +260,14 @@ def _clean_utm(v: str) -> str:
     return "" if norm(v) in ("sem utm", "(not set)", "(none)", "null", "undefined") else v
 
 
+def _clean_kw(v: str) -> str:
+    """Palavra-chave normalizada p/ cruzar mídia (aba Google Ads) x compras (utm_term):
+    minúscula, sem colchetes/aspas/+ (símbolos de tipo de correspondência) e espaços colapsados."""
+    v = _clean_utm(v)
+    v = re.sub(r'[\[\]"+]', " ", v.lower())
+    return " ".join(v.split())
+
+
 GA_EVENTS = {"page_view": "pv", "view_item": "vi", "item_view": "vi",
              "add_to_cart": "atc", "begin_checkout": "ck"}
 
@@ -277,6 +285,7 @@ def load_media(rows, ch):
         {"day": ["day", "data", "date"], "campaign": ["campaign name", "campaign", "campanha"],
          "adset": ["ad set name", "adset", "ad set", "ad group name", "ad group", "grupo de anuncios"],
          "ad": ["ad name", "anuncio"],
+         "kw": ["keyword", "search keyword", "keyword text", "palavra-chave", "palavra chave", "palavras-chave", "palavras chave"],
          "spent": ["amount spent", "cost (spend)", "cost", "spend", "valor gasto", "gasto"],
          "impr": ["impressions", "impress"],
          "clicks": ["link clicks", "clicks", "cliques"],
@@ -308,6 +317,8 @@ def load_media(rows, ch):
                "sp": round(to_float(cell(row, midx["spent"])), 4),
                "im": to_float(cell(row, midx["impr"])),
                "cl": to_float(cell(row, midx["clicks"]))}
+        if ch == "google":
+            rec["kw"] = _clean_kw(cell(row, midx["kw"])) or "(sem palavra-chave)"
         for k in ("vv3", "vv50", "vv95"):
             v = to_float(cell(row, midx[k]))
             if v:
@@ -370,6 +381,7 @@ def load_sales(rows, media):
          "utm_medium": ["utm medium", "utm_medium"],
          "utm_campaign": ["utm campaign", "utm_campaign"],
          "utm_content": ["utm content", "utm_content"],
+         "utm_term": ["utm term", "utm_term"],
          "status": ["status"]},
         {"created": 0, "name": 1, "email": 2, "prod": 4, "val": 5, "order": 11})
     # campanha (normalizada) -> (canal, nome real) vindo das abas de mídia; ambígua entre canais = ignora
@@ -416,15 +428,19 @@ def load_sales(rows, media):
             order_attr[oid] = {"d": parse_date(cell(row, sidx["created"])), "ch": ch, "src": sg, "camp": camp,
                                "adset": adset or "(sem conjunto)",
                                # utm_content só identifica anúncio no Meta (no Google costuma ser posicionamento/link)
-                               "ad": (utm_ad if ch == "meta" else "") or "(sem anúncio)"}
+                               "ad": (utm_ad if ch == "meta" else "") or "(sem anúncio)",
+                               # utm_term = palavra-chave ({keyword}) só nas compras do Google Ads
+                               "kw": (_clean_kw(cell(row, sidx["utm_term"])) or "(sem palavra-chave)") if ch == "google" else ""}
         at = order_attr[oid]
         prod = cell(row, sidx["prod"]) or "—"
         val = to_float(cell(row, sidx["val"]))
-        key = (at["d"], at["ch"], at["src"], at["camp"], at["adset"], at["ad"], prod)
+        key = (at["d"], at["ch"], at["src"], at["camp"], at["adset"], at["ad"], at["kw"], prod)
         g = groups.get(key)
         if g is None:
             g = groups[key] = {"d": at["d"], "ch": at["ch"], "src": at["src"], "camp": at["camp"], "adset": at["adset"],
                                "ad": at["ad"], "prod": prod, "main": 0, "val": 0.0, "n": 0}
+            if at["kw"]:
+                g["kw"] = at["kw"]
         g["val"] += val
         g["n"] += 1
         if first:
