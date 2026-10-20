@@ -399,10 +399,10 @@ function renderProdTable(id, salesSet){
   const by={}; let totN=0, totV=0;
   salesSet.forEach(r=>{ const a=by[r.prod]||(by[r.prod]={n:0,v:0}); a.n+=r.n; a.v+=r.val; totN+=r.n; totV+=r.val; });
   const rows=Object.entries(by).sort((a,b)=>b[1].v-a[1].v).map(([prod,a])=>
-    ({k:prod, cells:{prod:prod, itens:a.n, fat:a.v, pctf:totV?a.v/totV:null}}));
+    ({k:prod, cells:{prod:prod, itens:a.n, fat:a.v, ticket:a.n?a.v/a.n:null, pctf:totV?a.v/totV:null}}));
   renderTable({id, cols:[{key:'prod',label:'Produto',type:'dim',big:true},{key:'itens',label:'Itens',type:'int',w:70},
-      {key:'fat',label:'Faturamento',type:'brl',w:110},{key:'pctf',label:'% Fat.',type:'pct',w:80}],
-    rows, total:{prod:null,itens:totN,fat:totV,pctf:totV?1:null}});
+      {key:'fat',label:'Faturamento',type:'brl',w:110},{key:'ticket',label:'Ticket Médio',type:'brl',w:110},{key:'pctf',label:'% Fat.',type:'pct',w:80}],
+    rows, total:{prod:null,itens:totN,fat:totV,ticket:totN?totV/totN:null,pctf:totV?1:null}});
 }
 
 /* ---- comparativo período atual vs período anterior de MESMO tamanho ---- */
