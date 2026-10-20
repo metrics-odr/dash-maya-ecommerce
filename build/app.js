@@ -383,15 +383,15 @@ function renderFunnel(id, steps, dd){
   const sp=k=>spark(dd.map(ser[k]));
   const sec=(s,i)=>s[2][i]||['',''];
   const pill=x=>`<span class="s-val${x[2]?' s-pill '+x[2]:''}">${x[1]}</span>`;
-  const kpi=(label,val,key,delta,cls)=>`<div class="fk"><div class="fk-label">${label}</div><div class="fk-val ${cls||''}">${val}</div>${delta?`<div class="m-delta">${delta}</div>`:''}${sp(key)}</div>`;
+  const kpi=(label,val,key,delta,cls,tone)=>`<div class="fk${tone?' tint t-'+tone:''}"><div class="fk-label">${label}</div><div class="fk-val ${cls||''}">${val}</div>${delta?`<div class="m-delta">${delta}</div>`:''}${sp(key)}</div>`;
   const g=st.gasto, f=st.fat, roas=sec(f,0), tick=sec(f,1);
-  const kpis=kpi('Gasto total',g[1],'gasto',g[5])+kpi('Faturamento',f[1],'fat',f[5])
-    +kpi('ROAS',roas[1],'roas','','roas-v')+kpi('Ticket médio',tick[1],'ticket');
+  const kpis=kpi('Gasto total',g[1],'gasto',g[5],'','red')+kpi('Faturamento',f[1],'fat',f[5],'','green')
+    +kpi('ROAS',roas[1],'roas','','roas-v','yellow')+kpi('Ticket médio',tick[1],'ticket');
   const order=['impr','cl','pv','vi','atc','ck','vendas'];
   const stepsHtml=order.map((k,i)=>{
     const s=st[k], cost=sec(s,0), rate=sec(s,1);
     const conn=i?`<div class="fs-conn"><span class="fs-arrow">›</span><span class="fs-rate-l">${rate[0]}</span><span class="fs-rate">${rate[1]}</span></div>`:'';
-    return conn+`<div class="fs"><div class="fs-label">${s[0]}</div><div class="fs-val">${s[1]}</div>${s[5]?`<div class="m-delta">${s[5]}</div>`:''}${sp(k)}
+    return conn+`<div class="fs${k==='vendas'?' tint t-blue':''}"><div class="fs-label">${s[0]}</div><div class="fs-val">${s[1]}</div>${s[5]?`<div class="m-delta">${s[5]}</div>`:''}${sp(k)}
       <div class="fs-cost"><span class="s-label">${cost[0]}</span>${pill(cost)}</div></div>`;
   }).join('');
   document.getElementById(id).innerHTML=`<div class="fnl-kpis">${kpis}</div><div class="fnl-steps">${stepsHtml}</div>`;

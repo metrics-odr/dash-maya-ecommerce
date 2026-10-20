@@ -154,6 +154,13 @@
   .fs-arrow{color:var(--muted); font-size:15px; line-height:1}
   .fs-rate-l{color:var(--muted); font-size:10.5px}
   .fs-rate{font-weight:600; font-variant-numeric:tabular-nums; font-size:11.5px}
+  /* cards-chave do funil: tom translúcido (cores --tone-* em identidade-visual.css) */
+  .t-red{--t:var(--tone-red)} .t-blue{--t:var(--tone-blue)} .t-green{--t:var(--tone-green)} .t-yellow{--t:var(--tone-yellow)}
+  .tint{background:color-mix(in srgb,var(--t) 9%,var(--surface)); border-color:color-mix(in srgb,var(--t) 30%,var(--border))}
+  .fs.tint:last-child{border-color:color-mix(in srgb,var(--t) 55%,var(--border)); box-shadow:0 0 0 1px color-mix(in srgb,var(--t) 55%,transparent)}
+  .tint .spark-line{stroke:var(--t)}
+  .tint .spark-area{fill:var(--t); opacity:.2}
+  .tint .fk-label,.tint .fs-label{color:color-mix(in srgb,var(--t) 55%,var(--muted))}
   .spark{display:block; width:100%; height:34px; margin:8px 0 2px; overflow:visible}
   .spark-line{fill:none; stroke:var(--accent-blue); stroke-width:1.6; vector-effect:non-scaling-stroke; stroke-linejoin:round}
   .spark-area{fill:var(--accent-blue); opacity:.14; stroke:none}

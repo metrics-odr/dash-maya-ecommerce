@@ -29,6 +29,8 @@
   /* indicativo ativo/pausado */
   --status-active:#6B4E9B; --status-active-glow:rgba(107,78,155,.45);
   --nav-active-bg:rgba(184,125,190,.22);
+  /* tons dos cards-chave do funil (Gasto/Compras/Faturamento/ROAS) */
+  --tone-red:#D6455D; --tone-blue:#3B82C4; --tone-green:#1E9E5A; --tone-yellow:#C98A12;
 }
 
 /* ------------------------------ TEMA ESCURO (padrão) ----------------------- */
@@ -51,6 +53,7 @@
   --grid:#4A3A7A;
   --thead:#382A63;
   --tfoot:#382A63;
+  --tone-red:#FF6B81; --tone-blue:#6FB1F0; --tone-green:#3DD68C; --tone-yellow:#F5B942;
   /* PALETA base p/ bordas do funil */
   --c1:#B07FD0; --c2:#3DD68C; --c3:#F5B942; --c4:#8E7CC3; --c5:#FF6B81;
   --c6:#C9A6E0; --c7:#E57FB8; --c8:#9BD66B; --c9:#FF9A5B; --c10:#7A6AD8;
