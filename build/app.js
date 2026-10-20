@@ -38,7 +38,7 @@ const STATE = {
   selDays:new Set(), gTraf:'todos', gSrc:'todos',   /* filtros da Visão Geral: tráfego (pago/organico) e canal (utm_source) */
   mSelC:new Set(), mSelA:new Set(), mSelAd:new Set(),
   sort:{}, colw: (()=>{ try{ return JSON.parse(localStorage.getItem('dm_colw')||'{}'); }catch(e){ return {}; } })(),
-  search:{tCamp:'', tAdset:'', tAd:''},
+  search:{tCamp:'', tAdset:'', tAd:'', tKw:''},
 };
 const taxf = ()=> STATE.tax ? TAX : 1;
 /* o imposto incide só sobre o gasto do Meta Ads */
@@ -628,6 +628,20 @@ function renderChannel(){
   cacDimChart('chAdset', Sa.fM, Sa.fS, 'adset', STATE.mSelA);
   cacDimChart('chAd', Sd.fM, Sd.fS, 'ad', STATE.mSelAd);
 
+  /* Palavras-chave (só Google): mídia (coluna keyword) + compras (utm_term); respeita período e campanha, não conjunto/anúncio */
+  const kwOn=ch==='google';
+  document.getElementById('kwTableBlock').hidden=!kwOn; document.getElementById('kwNote').hidden=!kwOn;
+  if(kwOn){
+    const kf=r=>r.ch===ch && dateActive(r.d) && (!STATE.mSelC.size||STATE.mSelC.has(r.camp));
+    const kM=MEDIA.filter(kf), kS=SALES.filter(kf).filter(r=>r.kw);
+    const kAgg=buildAgg(kS,kM,'kw');
+    let kRows=Object.entries(kAgg).map(([k,a])=>({k, cells:Object.assign({dim:k}, metricCells(a,derive(a)))}))
+      .sort((a,b)=>(b.cells.gasto-a.cells.gasto)||(b.cells.vendas-a.cells.vendas));
+    const q=norm(STATE.search.tKw); if(q) kRows=kRows.filter(r=>norm(r.cells.dim).includes(q));
+    renderTable({id:'tKw', cols:HCOLS.map((c,i)=>i===0?{...c,label:'Palavra-chave',big:true}:c), rows:kRows, total:totRowOf(totals(kS,kM))});
+    cacDimChart('chKw', kM, kS, 'kw', null);
+  }
+
   /* Compradores: últimos pedidos (PII mascarada), respeitando canal + período */
   const rows=BUYERS.filter(b=>b.ch===ch && dateActive(b.d));
   document.getElementById('qCount').textContent=rows.length+' compras';
@@ -913,8 +927,8 @@ function ppApply(){
 /* ---------------- navigation & boot ---------------- */
 const CH_PAGES=['meta','google','tiktok'];
 function setPage(p){
-  if(CH_PAGES.includes(p) && STATE.page!==p){ STATE.mSelC.clear(); STATE.mSelA.clear(); STATE.mSelAd.clear(); STATE.search={tCamp:'',tAdset:'',tAd:''};
-    ['searchCamp','searchAdset','searchAd'].forEach(i=>{ const e=document.getElementById(i); if(e) e.value=''; }); }
+  if(CH_PAGES.includes(p) && STATE.page!==p){ STATE.mSelC.clear(); STATE.mSelA.clear(); STATE.mSelAd.clear(); STATE.search={tCamp:'',tAdset:'',tAd:'',tKw:''};
+    ['searchCamp','searchAdset','searchAd','searchKw'].forEach(i=>{ const e=document.getElementById(i); if(e) e.value=''; }); }
   STATE.page=p;
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===p));
   document.getElementById('page-geral').classList.toggle('active',p==='geral');
@@ -948,7 +962,7 @@ document.getElementById('clearCampBtn').addEventListener('click',()=>{ STATE.mSe
 document.getElementById('clearAdsetBtn').addEventListener('click',()=>{ STATE.mSelA.clear(); renderChannel(); });
 document.getElementById('clearAdBtn').addEventListener('click',()=>{ STATE.mSelAd.clear(); renderChannel(); });
 /* busca por nome (campanha/conjunto/anúncio) — case/acento-insensitive */
-[['searchCamp','tCamp'],['searchAdset','tAdset'],['searchAd','tAd']].forEach(([inputId,key])=>{
+[['searchCamp','tCamp'],['searchAdset','tAdset'],['searchAd','tAd'],['searchKw','tKw']].forEach(([inputId,key])=>{
   document.getElementById(inputId).addEventListener('input',function(){ STATE.search[key]=this.value; renderChannel(); });
 });
 document.getElementById('refreshBtn').addEventListener('click',function(){ this.classList.add('loading'); location.href=location.pathname+'?t='+Date.now()+location.hash; });

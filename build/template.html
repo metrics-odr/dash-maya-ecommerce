@@ -156,6 +156,12 @@
           <div class="tbl-wrap tbl-double"><table class="dt" id="tAd"></table></div>
           <div class="pair-chart"><div class="pc-title">CAC por anúncio, por dia</div><canvas id="chAd"></canvas></div>
         </div>
+        <div class="table-chart-pair" id="kwTableBlock" hidden>
+          <div class="thead-title"><span>Palavras-chave</span><input type="text" class="tbl-search" id="searchKw" placeholder="Buscar palavra-chave..."></div>
+          <div class="tbl-wrap tbl-normal"><table class="dt" id="tKw"></table></div>
+          <div class="pair-chart"><div class="pc-title">CAC por palavra-chave, por dia</div><canvas id="chKw"></canvas></div>
+        </div>
+        <p class="note" id="kwNote" hidden>Palavras-chave: a mídia vem da coluna de palavra-chave da aba Google Ads e as compras são cruzadas por <b>utm_term</b>. Compras sem utm_term ficam em “(sem palavra-chave)”; respeita o período e a campanha selecionada.</p>
         <p class="note">Campanha/conjunto/anúncio vêm da aba de mídia; as compras são atribuídas por <b>utm_campaign</b> (e utm_content no Meta). O funil do GA4 não existe nesse nível, por isso as tabelas mostram mídia + compras.</p>
 
         <h2 class="sec-title">Compradores <span class="pill q" id="qCount"></span></h2>
