@@ -244,6 +244,9 @@
   #gDaily th.dim, #gDaily td.dim, #tDaily th.dim, #tDaily td.dim{text-align:center}
   #gChan th, #gChan td, #gChan tfoot td, #gProd th, #gProd td, #gProd tfoot td, #mProd th, #mProd td, #mProd tfoot td{text-align:center}
   #gChan th.dim, #gChan td.dim, #gChan tfoot td.dim, #gProd th.dim, #gProd td.dim, #gProd tfoot td.dim, #mProd th.dim, #mProd td.dim, #mProd tfoot td.dim{text-align:left}
+  /* Tabelas de otimização: métricas centralizadas, dimensão (nome) à esquerda */
+  #tCamp th, #tCamp td, #tCamp tfoot td, #tAdset th, #tAdset td, #tAdset tfoot td, #tAd th, #tAd td, #tAd tfoot td, #tKw th, #tKw td, #tKw tfoot td{text-align:center}
+  #tCamp th.dim, #tCamp td.dim, #tCamp tfoot td.dim, #tAdset th.dim, #tAdset td.dim, #tAdset tfoot td.dim, #tAd th.dim, #tAd td.dim, #tAd tfoot td.dim, #tKw th.dim, #tKw td.dim, #tKw tfoot td.dim{text-align:left}
   .pair-chart{border-top:1px solid var(--border); padding:8px 10px 10px; height:190px; display:flex; flex-direction:column}
   .pair-chart .pc-title{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; padding:0 4px 4px; flex:0 0 auto}
   .pair-chart canvas{flex:1 1 auto; min-height:0}
