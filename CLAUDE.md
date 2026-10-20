@@ -105,7 +105,7 @@ ligar: preencher o GID em `build/config.py`.
   ACR (AddToCart/Product View) · CPAC · VisCHK (Checkouts/AddToCart) · CPIC · ConvCHK (Compras/Checkouts) ·
   CAC (Gasto/Compras) · Ticket Médio · ROAS (Faturamento/Gasto). Na Visão Geral, CAC/ROAS são *blended*
   (gasto de mídia paga ÷ todas as compras) e CR/CPV usam só os page views dos canais pagos.
-- **Visão Geral** = acumulado de todos os canais (+ tabela "Resultado por canal"); **Meta/Google/TikTok** =
+- **Visão Geral** ("Acumulado total") = acumulado de todos os canais (+ tabela "Resultado por canal"), com dois filtros no topo da seção: **Tráfego** (Todos/Pago/Orgânico — Pago = canais de mídia paga) e **Canal** por utm_source (Todos/Meta Ads/Google Ads/GPT/Google Org/Direto, via `classify_source` em `build.py`, campo `src` em `ga[]`/`sales[]`); "Remover Filtros" os reseta; **Meta/Google/TikTok** =
   só o respectivo canal.
 - **Imposto**: `TAX_FACTOR = 1.0` (sem imposto; o toggle some). Se > 1, incide só sobre o gasto do Meta.
 - **Sem metas** de CAC/ROAS por enquanto (`0.0`): a Saúde do funil usa o histórico da conta.

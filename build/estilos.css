@@ -93,6 +93,15 @@
   .page.active{display:block}
   .sec-title{font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin:22px 0 12px}
   .sec-title:first-child{margin-top:0}
+  .sec-head{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px 20px; margin:0 0 12px}
+  .sec-head .sec-title{margin:0}
+  .g-filters{display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center}
+  .gf{display:flex; align-items:center; gap:8px; min-width:0}
+  .gf-label{font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--muted)}
+  .seg{display:inline-flex; flex-wrap:wrap; gap:2px; padding:3px; border:1px solid var(--border); border-radius:9px; background:var(--surface)}
+  .seg-btn{border:0; background:transparent; color:var(--ink); border-radius:7px; padding:5px 11px; font-size:12px; cursor:pointer; white-space:nowrap}
+  .seg-btn:hover{background:rgba(127,127,127,.12)}
+  .seg-btn.active{background:var(--accent-blue); color:#fff}
 
   .grid{display:grid; gap:16px}
   .two-col{grid-template-columns:380px 1fr}

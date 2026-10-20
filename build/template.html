@@ -69,7 +69,13 @@
     <div class="page-content">
       <!-- ===================== PÁGINA 1: VISÃO GERAL ===================== -->
       <div class="page active" id="page-geral">
-        <h2 class="sec-title">Funil &amp; evolução diária · acumulado de todos os canais</h2>
+        <div class="sec-head">
+          <h2 class="sec-title">Acumulado total</h2>
+          <div class="g-filters">
+            <div class="gf"><span class="gf-label">Tráfego</span><div class="seg" id="gfTraf"></div></div>
+            <div class="gf"><span class="gf-label">Canal</span><div class="seg" id="gfSrc"></div></div>
+          </div>
+        </div>
         <div class="grid funnel-grid">
           <div class="card"><div class="funnel" id="geralFunnel"></div>
             <p class="note">Soma de <b>todos os canais</b> (Meta, Google, TikTok e orgânico/direto). Etapas de Page Views a Checkouts = <b>sessões do GA4</b>; Compras = pedidos distintos e Faturamento = soma dos itens da aba Compras. CAC e ROAS são <b>blended</b> (gasto de mídia paga ÷ todas as compras); CPV e CR usam só os page views dos canais pagos.</p>

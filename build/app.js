@@ -34,7 +34,7 @@ const TODAY = B.today || B.date_max;
 /* ---------------- STATE ---------------- */
 const STATE = {
   page:'geral', from:B.date_min, to:B.date_max, preset:'todo', tax:true,
-  selDays:new Set(),
+  selDays:new Set(), gTraf:'todos', gSrc:'todos',   /* filtros da Visão Geral: tráfego (pago/organico) e canal (utm_source) */
   mSelC:new Set(), mSelA:new Set(), mSelAd:new Set(),
   sort:{}, colw: (()=>{ try{ return JSON.parse(localStorage.getItem('dm_colw')||'{}'); }catch(e){ return {}; } })(),
   search:{tCamp:'', tAdset:'', tAd:''},
@@ -98,9 +98,9 @@ const inRange=(d,a,b)=>d&&d>=a&&d<=b;
    -> só aquele canal, com o drill-down Campanha→Conjunto→Anúncio (`ex` = dimensão a NÃO filtrar,
    para a própria tabela mostrar todas as suas linhas). win = janela custom (período anterior).
    O GA4 não tem campanha/anúncio: com qualquer seleção ativa o funil do GA4 sai do escopo (sel=true). */
-function scopeData(ch, ex, win){
+function scopeData(ch, ex, win, gf){
   const ok = win ? (d=>inRange(d,win.from,win.to)) : dateActive;
-  const f = r => ok(r.d) && (!ch || r.ch===ch);
+  const f = r => ok(r.d) && (!ch || r.ch===ch) && (!gf || geralMatch(r));
   let fM=MEDIA.filter(f), fS=SALES.filter(f), fG=GA.filter(f);
   let sel=false;
   if(ch){
@@ -111,6 +111,23 @@ function scopeData(ch, ex, win){
   }
   if(sel) fG=[];
   return {fM,fS,fG,sel};
+}
+
+/* Filtros da Visão Geral: Tráfego (Pago = mídia paga · Orgânico = o resto) e Canal (utm_source).
+   Linhas de mídia não têm `src`: valem o próprio canal pago. */
+const G_TRAF=[['todos','Todos'],['pago','Pago'],['organico','Orgânico']];
+const G_SRC=[['todos','Todos'],['meta','Meta Ads'],['google','Google Ads'],['gpt','GPT'],['google_org','Google Org'],['direto','Direto']];
+function geralMatch(r){
+  const paid=PAID.includes(r.ch);
+  if(STATE.gTraf==='pago' && !paid) return false;
+  if(STATE.gTraf==='organico' && paid) return false;
+  return STATE.gSrc==='todos' || (r.src||r.ch)===STATE.gSrc;
+}
+function renderGeralFilters(){
+  const mk=(id,opts,key)=>{ const el=document.getElementById(id); if(!el) return;
+    el.innerHTML=opts.map(([v,l])=>`<button type="button" class="seg-btn${STATE[key]===v?' active':''}" data-v="${v}">${l}</button>`).join('');
+    el.querySelectorAll('.seg-btn').forEach(b=>b.addEventListener('click',()=>{ STATE[key]=b.dataset.v; renderAll(); })); };
+  mk('gfTraf',G_TRAF,'gTraf'); mk('gfSrc',G_SRC,'gSrc');
 }
 
 /* ---------------- generic interactive table ---------------- */
@@ -461,9 +478,10 @@ function convCharts(ids,dd){
 
 /* ---------------- PAGE 1: Visão Geral (acumulado de todos os canais) ---------------- */
 function renderGeral(){
-  const S=scopeData(null), t=totals(S.fS,S.fM,S.fG), d=derive(t);
+  renderGeralFilters();
+  const S=scopeData(null,null,null,true), t=totals(S.fS,S.fM,S.fG), d=derive(t);
   const pw=prevWindow(); let tp=null;
-  if(pw){ const P=scopeData(null,null,pw); tp=totals(P.fS,P.fM,P.fG); }
+  if(pw){ const P=scopeData(null,null,pw,true); tp=totals(P.fS,P.fM,P.fG); }
   const dd=daily(S.fS,S.fM,S.fG);
   renderFunnel('geralFunnel', funnelSteps(t, tp, false), dd);
   convCharts(['gCpmCtr','gCrPvr','gAcrChk','gConv'], dd);
@@ -883,7 +901,7 @@ document.getElementById('ppCancel').addEventListener('click',ppClose);
 document.getElementById('periodPop').addEventListener('click',e=>e.stopPropagation());
 document.addEventListener('click',()=>{ if(ppIsOpen()) ppClose(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&ppIsOpen()) ppClose(); });
-document.getElementById('clearBtn').addEventListener('click',()=>{ STATE.mSelC.clear();STATE.mSelA.clear();STATE.mSelAd.clear();STATE.selDays.clear(); applyPreset('mes'); });
+document.getElementById('clearBtn').addEventListener('click',()=>{ STATE.mSelC.clear();STATE.mSelA.clear();STATE.mSelAd.clear();STATE.selDays.clear(); STATE.gTraf='todos'; STATE.gSrc='todos'; applyPreset('mes'); });
 /* botões ✕ Filtro de cada tabela (Campanhas/Conjuntos/Anúncios): limpam só a própria dimensão */
 document.getElementById('clearCampBtn').addEventListener('click',()=>{ STATE.mSelC.clear(); renderChannel(); });
 document.getElementById('clearAdsetBtn').addEventListener('click',()=>{ STATE.mSelA.clear(); renderChannel(); });
