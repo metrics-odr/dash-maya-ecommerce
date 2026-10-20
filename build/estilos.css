@@ -102,12 +102,15 @@
   /* Resultado por canal (esq., encolhe/rola) + Compras por produto (dir., cabe inteira); mesma altura */
   .chan-prod{display:grid; grid-template-columns:minmax(0,1fr) minmax(400px,32%); gap:16px; align-items:stretch}
   .chan-prod>div{display:flex; flex-direction:column; min-width:0}
-  .chan-prod>div>.card{flex:1; display:flex; flex-direction:column}
+  .chan-prod{margin-top:22px}
+  .chan-prod>div>.sec-title{margin-top:0}
+  .chan-prod>div>.card{flex:1; display:flex; flex-direction:column; overflow:hidden}
   .chan-prod>div>.card>.tbl-wrap{flex:1}
   @media(max-width:1200px){.chan-prod{grid-template-columns:minmax(0,1fr)}}
   @media(max-width:1000px){.two-col,.three-col,.funnel-grid{grid-template-columns:1fr}}
   @media(max-width:1200px){.funnel-charts{grid-template-columns:1fr}}
   .card{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px}
+  .card:has(>.tbl-wrap){overflow:hidden}
   .card h3{margin:0 0 2px; font-size:14px}
   .card .hint{font-size:12px; color:var(--muted); margin:0 0 10px}
 
