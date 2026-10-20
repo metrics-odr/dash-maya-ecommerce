@@ -98,10 +98,8 @@
   .g-filters{display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center}
   .gf{display:flex; align-items:center; gap:8px; min-width:0}
   .gf-label{font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--muted)}
-  .seg{display:inline-flex; flex-wrap:wrap; gap:2px; padding:3px; border:1px solid var(--border); border-radius:9px; background:var(--surface)}
-  .seg-btn{border:0; background:transparent; color:var(--ink); border-radius:7px; padding:5px 11px; font-size:12px; cursor:pointer; white-space:nowrap}
-  .seg-btn:hover{background:rgba(127,127,127,.12)}
-  .seg-btn.active{background:var(--accent-blue); color:#fff}
+  .gf-select{appearance:none; -webkit-appearance:none; border:1px solid var(--border); background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%238a8fa3' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 11px center; color:var(--ink); border-radius:9px; padding:8px 30px 8px 12px; font-size:12.5px; font-family:inherit; cursor:pointer; min-width:120px}
+  .gf-select:hover,.gf-select:focus{border-color:var(--accent-blue); outline:none}
 
   .grid{display:grid; gap:16px}
   .two-col{grid-template-columns:380px 1fr}
