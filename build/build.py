@@ -233,6 +233,21 @@ def classify_channel(source: str, medium: str) -> str:
     return "outros"
 
 
+def classify_source(source: str, medium: str, ch: str) -> str:
+    """Grupo de origem p/ o filtro "Canal" da Visão Geral (utm_source):
+    meta | google (Ads) | tiktok | gpt | google_org | direto | outros."""
+    if ch != "outros":
+        return ch
+    s, m = _src_token(source), norm(medium)
+    if re.search(r"chatgpt|openai|gpt", s):
+        return "gpt"
+    if s in GOOGLE_SOURCES:
+        return "google_org"
+    if s in ("", "(direct)", "direct", "(none)", "(not set)", "sem utm", "null", "undefined"):
+        return "direto"
+    return "outros"
+
+
 def split_source_medium(v: str) -> tuple[str, str]:
     parts = [p.strip() for p in (v or "").split("/", 1)]
     return parts[0], (parts[1] if len(parts) > 1 else "")
@@ -329,9 +344,10 @@ def load_ga4(rows):
         if gidx["medium"] is not None:
             med = cell(row, gidx["medium"]) or med
         ch = classify_channel(src, med)
-        a = acc.setdefault((d, ch), {"d": d, "ch": ch, "pv": 0.0, "vi": 0.0, "atc": 0.0, "ck": 0.0})
+        sg = classify_source(src, med, ch)
+        a = acc.setdefault((d, ch, sg), {"d": d, "ch": ch, "src": sg, "pv": 0.0, "vi": 0.0, "atc": 0.0, "ck": 0.0})
         a[ev] += to_float(cell(row, gidx["sessions"]))
-    return sorted(acc.values(), key=lambda r: (r["d"], r["ch"]))
+    return sorted(acc.values(), key=lambda r: (r["d"], r["ch"], r["src"]))
 
 
 def load_sales(rows, media):
@@ -381,29 +397,31 @@ def load_sales(rows, media):
         if first:
             src, med = cell(row, sidx["utm_source"]), cell(row, sidx["utm_medium"])
             ch = classify_channel(src, med)
+            sg = classify_source(src, med, ch)
             utm_camp, utm_ad = _clean_utm(cell(row, sidx["utm_campaign"])), _clean_utm(cell(row, sidx["utm_content"]))
             camp = utm_camp or "(sem campanha)"
             hit = camp_map.get(norm(utm_camp)) if utm_camp else None
             if hit and hit[0]:
                 ch, camp = hit[0], hit[1]          # campanha real da plataforma manda no canal
+                sg = ch
             elif utm_ad and len(adname_map.get(norm(utm_ad), ())) == 1:
                 # sem campanha reconhecível, mas utm_content = Ad Name único do Meta: herda campanha/conjunto
-                ch = "meta"
+                ch = sg = "meta"
                 camp, adset_hit = next(iter(adname_map[norm(utm_ad)]))
             adset = adset_hit if (ch == "meta" and not hit and utm_ad and len(adname_map.get(norm(utm_ad), ())) == 1) else ""
             if ch == "meta" and not adset:
                 adset = ad_map.get((norm(camp), norm(utm_ad))) or _clean_utm(cell(row, sidx["utm_medium"]))
-            order_attr[oid] = {"d": parse_date(cell(row, sidx["created"])), "ch": ch, "camp": camp,
+            order_attr[oid] = {"d": parse_date(cell(row, sidx["created"])), "ch": ch, "src": sg, "camp": camp,
                                "adset": adset or "(sem conjunto)",
                                # utm_content só identifica anúncio no Meta (no Google costuma ser posicionamento/link)
                                "ad": (utm_ad if ch == "meta" else "") or "(sem anúncio)"}
         at = order_attr[oid]
         prod = cell(row, sidx["prod"]) or "—"
         val = to_float(cell(row, sidx["val"]))
-        key = (at["d"], at["ch"], at["camp"], at["adset"], at["ad"], prod)
+        key = (at["d"], at["ch"], at["src"], at["camp"], at["adset"], at["ad"], prod)
         g = groups.get(key)
         if g is None:
-            g = groups[key] = {"d": at["d"], "ch": at["ch"], "camp": at["camp"], "adset": at["adset"],
+            g = groups[key] = {"d": at["d"], "ch": at["ch"], "src": at["src"], "camp": at["camp"], "adset": at["adset"],
                                "ad": at["ad"], "prod": prod, "main": 0, "val": 0.0, "n": 0}
         g["val"] += val
         g["n"] += 1
