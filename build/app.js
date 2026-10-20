@@ -125,8 +125,8 @@ function geralMatch(r){
 }
 function renderGeralFilters(){
   const mk=(id,opts,key)=>{ const el=document.getElementById(id); if(!el) return;
-    el.innerHTML=opts.map(([v,l])=>`<button type="button" class="seg-btn${STATE[key]===v?' active':''}" data-v="${v}">${l}</button>`).join('');
-    el.querySelectorAll('.seg-btn').forEach(b=>b.addEventListener('click',()=>{ STATE[key]=b.dataset.v; renderAll(); })); };
+    el.innerHTML=opts.map(([v,l])=>`<option value="${v}"${STATE[key]===v?' selected':''}>${l}</option>`).join('');
+    el.onchange=()=>{ STATE[key]=el.value; renderAll(); }; };
   mk('gfTraf',G_TRAF,'gTraf'); mk('gfSrc',G_SRC,'gSrc');
 }
 
