@@ -235,12 +235,14 @@ def classify_channel(source: str, medium: str) -> str:
 
 def classify_source(source: str, medium: str, ch: str) -> str:
     """Grupo de origem p/ o filtro "Canal" da Visão Geral (utm_source):
-    meta | google (Ads) | tiktok | gpt | google_org | direto | outros."""
+    meta | google (Ads) | tiktok | instagram_org | gpt | google_org | direto | outros."""
     if ch != "outros":
         return ch
     s, m = _src_token(source), norm(medium)
     if re.search(r"chatgpt|openai|gpt", s):
         return "gpt"
+    if re.search(r"instagram", s) or s == "ig":
+        return "instagram_org"
     if s in GOOGLE_SOURCES:
         return "google_org"
     if s in ("", "(direct)", "direct", "(none)", "(not set)", "sem utm", "null", "undefined"):

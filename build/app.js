@@ -7,7 +7,7 @@ const MAIN_PRODUCT = B.main_product || 'Todos os produtos';
    direto/etc. (só entra na Visão Geral). A separação usa Session source/medium (GA4) e
    utm_source/utm_medium (Compras) — ver classify_channel() em build/build.py. */
 const PAID = ['meta','google','tiktok'];
-const CH_LABEL = {meta:'Meta Ads', google:'Google Ads', tiktok:'TikTok Ads', outros:'Outros (orgânico/direto)'};
+const CH_LABEL = {meta:'Meta Ads', google:'Google Ads', tiktok:'TikTok Ads', instagram_org:'Instagram Org', gpt:'ChatGPT Org', google_org:'Google Org', direto:'Direto', outros:'Outros'};
 
 /* ---------------- format ---------------- */
 const nf0=new Intl.NumberFormat('pt-BR',{maximumFractionDigits:0});
@@ -116,7 +116,7 @@ function scopeData(ch, ex, win, gf){
 /* Filtros da Visão Geral: Tráfego (Pago = mídia paga · Orgânico = o resto) e Canal (utm_source).
    Linhas de mídia não têm `src`: valem o próprio canal pago. */
 const G_TRAF=[['todos','Todos'],['pago','Pago'],['organico','Orgânico']];
-const G_SRC=[['todos','Todos'],['meta','Meta Ads'],['google','Google Ads'],['gpt','GPT'],['google_org','Google Org'],['direto','Direto']];
+const G_SRC=[['todos','Todos'],['meta','Meta Ads'],['google','Google Ads'],['instagram_org','Instagram Org'],['gpt','ChatGPT Org'],['google_org','Google Org'],['direto','Direto'],['outros','Outros']];
 function geralMatch(r){
   const paid=PAID.includes(r.ch);
   if(STATE.gTraf==='pago' && !paid) return false;
@@ -496,8 +496,8 @@ function renderGeral(){
   renderProdTable('gProd', S.fS);
 
   /* resumo por canal */
-  const chRows=['meta','google','tiktok','outros'].map(ch=>{
-    const f=r=>r.ch===ch, x=totals(S.fS.filter(f),S.fM.filter(f),S.fG.filter(f)), dv=derive(x);
+  const chRows=['meta','google','tiktok','instagram_org','gpt','google_org','direto','outros'].map(ch=>{
+    const f=r=>(r.src||r.ch)===ch, x=totals(S.fS.filter(f),S.fM.filter(f),S.fG.filter(f)), dv=derive(x);
     return {k:ch, cells:{dim:CH_LABEL[ch], gasto:dv.gasto, cliques:x.cl, pv:x.pv, ck:x.ck, vendas:x.vendas, cac:dv.cac, fat:x.fat, ticket:dv.ticket, roas:dv.roas, share:t.fat?x.fat/t.fat:null}};
   });
   renderTable({id:'gChan', cols:[{key:'dim',label:'Canal',type:'dim',w:130},
