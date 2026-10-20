@@ -99,14 +99,16 @@ const inRange=(d,a,b)=>d&&d>=a&&d<=b;
 const GRANS=[['dia','Diário','diária'],['semana','Semanal','semanal'],['mes','Mensal','mensal'],['tri','Trimestral','trimestral'],['sem','Semestral','semestral'],['ano','Anual','anual']];
 function granKey(d,g){
   const y=+d.slice(0,4), m=+d.slice(5,7), yy=d.slice(2,4);
-  if(g==='semana'){ const dt=new Date(d+'T00:00:00Z'); dt.setUTCDate(dt.getUTCDate()-(dt.getUTCDay()+6)%7); const s=dt.toISOString().slice(0,10); return [s,s.slice(8)+'/'+s.slice(5,7)]; }
-  if(g==='mes') return [d.slice(0,7), pad(m)+'/'+yy];
-  if(g==='tri'){ const q=Math.ceil(m/3); return [y+'-'+q, 'T'+q+'/'+yy]; }
-  if(g==='sem'){ const h=m<=6?1:2; return [y+'-'+h, 'S'+h+'/'+yy]; }
+  if(g==='semana'){ const dt=new Date(d+'T00:00:00Z'); dt.setUTCDate(dt.getUTCDate()-(dt.getUTCDay()+6)%7); const s=dt.toISOString().slice(0,10);
+    const th=new Date(dt); th.setUTCDate(th.getUTCDate()+3); const wy=th.getUTCFullYear();
+    const wk=Math.ceil(((th-Date.UTC(wy,0,1))/86400000+1)/7); return [s,'Semana '+wk+'/'+String(wy).slice(2)]; }
+  if(g==='mes') return [d.slice(0,7), MONTHS_PT[m-1]+'/'+yy];
+  if(g==='tri'){ const q=Math.ceil(m/3); return [y+'-'+q, q+'º Trimestre/'+yy]; }
+  if(g==='sem'){ const h=m<=6?1:2; return [y+'-'+h, h+'º Semestre/'+yy]; }
   return [String(y), String(y)];
 }
 function rollup(dd,g){
-  if(!g||g==='dia') return dd.map(x=>Object.assign({lbl:x.d.slice(5)},x));
+  if(!g||g==='dia') return dd.map(x=>Object.assign({lbl:x.d.slice(8)+'/'+x.d.slice(5,7)+'/'+x.d.slice(0,4)},x));
   const out={};
   dd.forEach(x=>{ const [k,l]=granKey(x.d,g); const o=out[k]||(out[k]=Object.assign({d:k,lbl:l},newBucket()));
     Object.keys(newBucket()).forEach(f=>{ o[f]+=x[f]; }); });
