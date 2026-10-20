@@ -321,14 +321,18 @@ const OPT_COLS=[
   {key:'roas',label:'ROAS',type:'roas',heat:'roas'},
 ];
 const DAILY_COLS=[{key:'date',label:'Data',type:'date'},{key:'wd',label:'Dia',type:'dim',w:64}].concat(METRIC_COLS);
+/* Meta Ads: ordem de análise do funil (Checkouts/CPIC depois do ConvCHK, Ticket no fim) */
+const META_DAILY_COLS=(()=>{ const by={}; METRIC_COLS.forEach(c=>by[c.key]=c);
+  by.ck={key:'ck',label:'Checkouts',type:'int'}; by.cpic={key:'cpic',label:'CPIC',type:'brl'};
+  return DAILY_COLS.slice(0,2).concat(['gasto','cpm','ctr','cr','pvr','acr','vischk','convchk','ck','cpic','vendas','cac','fat','roas','ticket'].map(k=>by[k])); })();
 const HCOLS=[{key:'dim',label:'',type:'dim',big:true}].concat(OPT_COLS);
-/* Só a tabela de Anúncios ganha HR/BR/ER (retenção de vídeo, Meta), entre CPM e CTR */
-const AD_HCOLS=(()=>{ const cols=HCOLS.slice(); const i=cols.findIndex(c=>c.key==='ctr');
-  cols.splice(i,0,{key:'hr',label:'HR',type:'pct'},{key:'br',label:'BR',type:'pct'},{key:'er',label:'ER',type:'pct'});
-  return cols; })();
+/* Só a tabela de Anúncios do Meta: ordem Gasto→CPM→CTR→Compras→CAC→Faturamento→ROAS; o resto (Impr., Cliques, CPC, HR/BR/ER, Ticket) vai para o fim */
+const AD_HCOLS=(()=>{ const by={}; HCOLS.forEach(c=>by[c.key]=c);
+  by.hr={key:'hr',label:'HR',type:'pct'}; by.br={key:'br',label:'BR',type:'pct'}; by.er={key:'er',label:'ER',type:'pct'};
+  return ['dim','gasto','cpm','ctr','vendas','cac','fat','roas','impr','cliques','cpc','hr','br','er','ticket'].map(k=>by[k]); })();
 function metricCells(x,d){
   return {gasto:d.gasto, impr:x.im, cliques:x.cl, cpm:d.cpm, cpc:d.cpc, hr:d.hr, br:d.br, er:d.er, ctr:d.ctr, cr:d.cr, pvr:d.pvr, acr:d.acr,
-    vischk:d.vischk, convchk:d.convchk, vendas:x.vendas, cac:d.cac, fat:x.fat, ticket:d.ticket, roas:d.roas};
+    vischk:d.vischk, convchk:d.convchk, ck:x.ck, cpic:d.cpic, vendas:x.vendas, cac:d.cac, fat:x.fat, ticket:d.ticket, roas:d.roas};
 }
 function dailyCells(x,d,isTotal){
   return Object.assign({date:isTotal?null:x.d, wd:isTotal?'':weekday(x.d)}, metricCells(x,d));
@@ -540,7 +544,7 @@ function renderChannel(){
   renderProdTable('mProd', S.fS);
 
   const dl=dd.slice().reverse();
-  renderTable({id:'tDaily', cols:DAILY_COLS,
+  renderTable({id:'tDaily', cols:ch==='meta'?META_DAILY_COLS:DAILY_COLS,
     rows:dl.map(x=>{const dv=derive(x); return {k:x.d, cells:dailyCells(x,dv)};}),
     total:dailyCells(t,d,true),
     selectable:true, selSet:STATE.selDays,
