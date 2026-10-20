@@ -329,7 +329,11 @@ const HCOLS=[{key:'dim',label:'',type:'dim',big:true}].concat(OPT_COLS);
 /* Só a tabela de Anúncios do Meta: ordem Gasto→CPM→CTR→Compras→CAC→Faturamento→ROAS; o resto (Impr., Cliques, CPC, HR/BR/ER, Ticket) vai para o fim */
 const AD_HCOLS=(()=>{ const by={}; HCOLS.forEach(c=>by[c.key]=c);
   by.hr={key:'hr',label:'HR',type:'pct'}; by.br={key:'br',label:'BR',type:'pct'}; by.er={key:'er',label:'ER',type:'pct'};
-  return ['dim','gasto','cpm','ctr','vendas','cac','fat','roas','impr','cliques','cpc','hr','br','er','ticket'].map(k=>by[k]); })();
+  ['cr','pvr','acr','vischk','convchk','ck','cpic'].forEach(k=>{ const m=METRIC_COLS.find(c=>c.key===k); by[k]=m||{key:k,label:k==='ck'?'Checkouts':'CPIC',type:k==='ck'?'int':'brl'}; });
+  return ['dim','gasto','cpm','ctr','cr','pvr','acr','vischk','convchk','ck','cpic','vendas','cac','fat','roas','impr','cliques','cpc','hr','br','er','ticket'].map(k=>by[k]); })();
+/* GA4 não tem nível de anúncio: as colunas de funil aparecem na ordem pedida, mas vazias ("-") */
+const AD_NO_GA=['cr','pvr','acr','vischk','convchk','ck','cpic'];
+function blankGa(cells){ AD_NO_GA.forEach(k=>cells[k]=null); return cells; }
 function metricCells(x,d){
   return {gasto:d.gasto, impr:x.im, cliques:x.cl, cpm:d.cpm, cpc:d.cpc, hr:d.hr, br:d.br, er:d.er, ctr:d.ctr, cr:d.cr, pvr:d.pvr, acr:d.acr,
     vischk:d.vischk, convchk:d.convchk, ck:x.ck, cpic:d.cpic, vendas:x.vendas, cac:d.cac, fat:x.fat, ticket:d.ticket, roas:d.roas};
@@ -564,7 +568,7 @@ function renderChannel(){
     statusMap:latestStatusByDim(mediaAllDates(ch,'C'),'camp','cs'), selectable:true, selSet:STATE.mSelC, onSelect:(k,e)=>selDim('C',k,e&&(e.ctrlKey||e.metaKey))});
   renderTable({id:'tAdset', cols:HCOLS.map((c,i)=>i===0?{...c,label:adset,big:true}:c), rows:hierRows(buildAgg(Sa.fS,Sa.fM,'adset'),'tAdset'), total:totRowOf(totals(Sa.fS,Sa.fM)),
     statusMap:latestStatusByDim(mediaAllDates(ch,'A'),'adset','as'), selectable:true, selSet:STATE.mSelA, onSelect:(k,e)=>selDim('A',k,e&&(e.ctrlKey||e.metaKey))});
-  renderTable({id:'tAd', cols:(ch==='meta'?AD_HCOLS:HCOLS).map((c,i)=>i===0?{...c,label:'Anúncio'}:c), rows:hierRows(buildAgg(Sd.fS,Sd.fM,'ad'),'tAd'), total:totRowOf(totals(Sd.fS,Sd.fM)),
+  renderTable({id:'tAd', cols:(ch==='meta'?AD_HCOLS:HCOLS).map((c,i)=>i===0?{...c,label:'Anúncio'}:c), rows:hierRows(buildAgg(Sd.fS,Sd.fM,'ad'),'tAd').map(r=>(ch==='meta'&&blankGa(r.cells),r)), total:(x=>ch==='meta'?blankGa(x):x)(totRowOf(totals(Sd.fS,Sd.fM))),
     statusMap:latestStatusByDim(mediaAllDates(ch,'D'),'ad','ds'), selectable:true, selSet:STATE.mSelAd, onSelect:(k,e)=>selDim('D',k,e&&(e.ctrlKey||e.metaKey))});
 
   cacDimChart('chCamp', Sc.fM, Sc.fS, 'camp', STATE.mSelC);
