@@ -924,6 +924,64 @@ function ppApply(){
   ppClose(); syncDateInputs(); renderAll();
 }
 
+/* ---- popover de metas de investimento e divisão de verba por fonte de tráfego ----
+   Salvo no navegador (localStorage 'dm_budget'): {goal: R$/mês, pct: {canal: %}}. Só planejamento —
+   não altera os dados; o "realizado" compara com o gasto do mês corrente das abas de mídia. */
+const BUDGET_KEY='dm_budget';
+const BUDGET_CH=[['google','Google Ads'],['meta','Meta Ads'],['tiktok','TikTok Ads'],['shopee','Shopee'],['amazon','Amazon'],['mercadolivre','Mercado Livre']];
+const BP={goal:0,pct:{}};
+function bpLoad(){ try{ const o=JSON.parse(localStorage.getItem(BUDGET_KEY)||'null'); return o&&typeof o==='object'?{goal:+o.goal||0,pct:o.pct||{}}:{goal:0,pct:{}}; }catch(e){ return {goal:0,pct:{}}; } }
+const BUDGET=bpLoad();
+function bpNum(s){ s=String(s==null?'':s).trim().replace(/[^\d.,]/g,''); if(!s) return 0;
+  if(s.includes(',')) s=s.replace(/\./g,'').replace(',','.'); else if(/^\d{1,3}(\.\d{3})+$/.test(s)) s=s.replace(/\./g,'');
+  const v=parseFloat(s); return isFinite(v)&&v>0?v:0; }
+function bpSpent(ch){ if(!PAID.includes(ch)) return null; const ym=TODAY.slice(0,7);
+  return MEDIA.reduce((s,r)=>s+((r.ch===ch&&r.d&&r.d.slice(0,7)===ym)?spx(r):0),0); }
+function bpIsOpen(){ const pop=document.getElementById('budgetPop'); return pop && !pop.hidden; }
+function bpOpen(){
+  ppClose(); BP.goal=BUDGET.goal; BP.pct=Object.assign({},BUDGET.pct);
+  document.getElementById('bpGoal').value=BP.goal?nf2.format(BP.goal):'';
+  document.getElementById('budgetPop').hidden=false;
+  document.getElementById('budgetBtn').setAttribute('aria-expanded','true');
+  bpRenderRows(); bpUpdate();
+}
+function bpClose(){ const pop=document.getElementById('budgetPop'); if(pop) pop.hidden=true;
+  const b=document.getElementById('budgetBtn'); if(b) b.setAttribute('aria-expanded','false'); }
+function bpRenderRows(){
+  document.getElementById('bpRows').innerHTML=BUDGET_CH.map(([k,l])=>{
+    const sp=bpSpent(k);
+    return `<div class="bp-row" data-k="${k}">
+      <div class="bp-name"><span>${l}</span><span class="bp-bar" ${sp==null?'hidden':''}><i></i></span><span class="bp-sub"></span></div>
+      <label class="bp-pct"><input type="text" inputmode="decimal" placeholder="0" value="${BP.pct[k]?String(BP.pct[k]).replace('.',','):''}" autocomplete="off"><span>%</span></label>
+      <div class="bp-val">-</div></div>`; }).join('');
+  document.querySelectorAll('#bpRows .bp-pct input').forEach(i=>i.addEventListener('input',()=>{
+    BP.pct[i.closest('.bp-row').dataset.k]=bpNum(i.value); bpUpdate(); }));
+}
+function bpUpdate(){
+  const goal=BP.goal; let tot=0;
+  document.querySelectorAll('#bpRows .bp-row').forEach(row=>{
+    const k=row.dataset.k, p=BP.pct[k]||0, alloc=goal*p/100, sp=bpSpent(k); tot+=p;
+    row.querySelector('.bp-val').textContent=goal&&p?brl(alloc):'-';
+    const sub=row.querySelector('.bp-sub'), bar=row.querySelector('.bp-bar i');
+    if(sp==null){ sub.textContent='Sem gasto automático (informe manualmente)'; return; }
+    sub.textContent='Realizado no mês: '+brl(sp)+(alloc?' · '+pct(sp/alloc)+' da verba':'');
+    bar.style.width=alloc?Math.min(100,sp/alloc*100)+'%':'0%'; bar.classList.toggle('over',!!alloc&&sp>alloc);
+  });
+  tot=Math.round(tot*100)/100;
+  const el=document.getElementById('bpTotal'), ok=tot===100, empty=tot===0;
+  el.innerHTML=empty?'Defina a divisão (soma = 100%)':`Total: <span class="${ok?'bp-total-ok':'bp-total-bad'}">${nf2.format(tot)}%</span>`+(ok?'':(tot<100?' · faltam '+nf2.format(100-tot)+'%':' · excede '+nf2.format(tot-100)+'%'));
+  document.getElementById('bpApply').disabled=!(ok||empty);
+}
+function bpSyncLabel(){
+  const el=document.getElementById('budgetBtnLabel'); if(!el) return;
+  el.textContent=BUDGET.goal?'Meta '+brl(BUDGET.goal)+'/mês':'Metas e verba';
+}
+function bpApply(){
+  BUDGET.goal=BP.goal; BUDGET.pct={}; BUDGET_CH.forEach(([k])=>{ if(BP.pct[k]>0) BUDGET.pct[k]=BP.pct[k]; });
+  try{ localStorage.setItem(BUDGET_KEY,JSON.stringify(BUDGET)); }catch(e){}
+  bpClose(); bpSyncLabel();
+}
+
 /* ---------------- navigation & boot ---------------- */
 const CH_PAGES=['meta','google','tiktok'];
 function setPage(p){
@@ -950,12 +1008,20 @@ document.querySelectorAll('.nav-item').forEach(n=>n.addEventListener('click',()=
 document.getElementById('taxToggle').addEventListener('click',function(){ STATE.tax=!STATE.tax; this.classList.toggle('on',STATE.tax); renderAll(); });
 if(TAX===1) document.getElementById('taxToggle').style.display='none';   /* sem imposto configurado: esconde o toggle */
 /* seletor de período: abre/fecha popover, aplicar/cancelar, fechar ao clicar fora/Esc */
-document.getElementById('periodBtn').addEventListener('click',e=>{ e.stopPropagation(); ppIsOpen()?ppClose():ppOpen(); });
+document.getElementById('periodBtn').addEventListener('click',e=>{ e.stopPropagation(); bpClose(); ppIsOpen()?ppClose():ppOpen(); });
+/* metas e verba: mesmo comportamento de abrir/fechar */
+document.getElementById('budgetBtn').addEventListener('click',e=>{ e.stopPropagation(); bpIsOpen()?bpClose():bpOpen(); });
+document.getElementById('budgetPop').addEventListener('click',e=>e.stopPropagation());
+document.getElementById('bpGoal').addEventListener('input',function(){ BP.goal=bpNum(this.value); bpUpdate(); });
+document.getElementById('bpGoal').addEventListener('blur',function(){ this.value=BP.goal?nf2.format(BP.goal):''; });
+document.getElementById('bpApply').addEventListener('click',bpApply);
+document.getElementById('bpCancel').addEventListener('click',bpClose);
+document.getElementById('bpClear').addEventListener('click',()=>{ BP.goal=0; BP.pct={}; document.getElementById('bpGoal').value=''; bpRenderRows(); bpUpdate(); });
 document.getElementById('ppApply').addEventListener('click',ppApply);
 document.getElementById('ppCancel').addEventListener('click',ppClose);
 document.getElementById('periodPop').addEventListener('click',e=>e.stopPropagation());
-document.addEventListener('click',()=>{ if(ppIsOpen()) ppClose(); });
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&ppIsOpen()) ppClose(); });
+document.addEventListener('click',()=>{ if(ppIsOpen()) ppClose(); if(bpIsOpen()) bpClose(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ if(ppIsOpen()) ppClose(); if(bpIsOpen()) bpClose(); } });
 document.getElementById('clearBtn').addEventListener('click',()=>{ STATE.mSelC.clear();STATE.mSelA.clear();STATE.mSelAd.clear();STATE.selDays.clear(); STATE.gTraf='todos'; STATE.gSrc='todos'; applyPreset('mes'); });
 /* botões ✕ Filtro de cada tabela (Campanhas/Conjuntos/Anúncios): limpam só a própria dimensão */
 document.getElementById('clearCampBtn').addEventListener('click',()=>{ STATE.mSelC.clear(); renderChannel(); });
@@ -976,6 +1042,7 @@ document.getElementById('buildFoot').textContent='build __BUILD_ID__';
 document.getElementById('buildFoot2').textContent='· build __BUILD_ID__';
 
 syncDateInputs();
+bpSyncLabel();
 document.getElementById('taxToggle').classList.toggle('on', STATE.tax);
 setPage((()=>{ const h=location.hash.replace('#',''); return (h==='rel'||CH_PAGES.includes(h))?h:'geral'; })());
 
