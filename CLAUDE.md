@@ -83,6 +83,8 @@ leitura via export CSV (link público).
 | **GA4 📥** | `GID_GA4` = 1669456740 | Date · Event name · Session source/medium · Event count · **Sessions** · Total users |
 | **Compras 🛒** | `GID_SALES` = 1836439885 | Data · Nome · Email · Produto · **Preço** · **Order ID** · utm_source/campaign/medium/term/content |
 | **Meta Ads📥** | `GID_META` = 1195145852 | Day · Campaign Name · Ad Set Name · Ad Name · Amount Spent · Impressions · Link Clicks · vídeo · status · permalink |
+| **Local no Google** | `GID_GEO_GOOGLE` = 1126389235 | Estado/Região · Gasto (+ Data) — gasto por estado, alimenta o tooltip do mapa |
+| **Local do Meta** | `GID_GEO_META` = 457716876 | idem, Meta |
 | TikTok Ads | `GID_TIKTOK` = *vazio — aguardando* | (mesmo formato do Meta/Google) |
 
 Canal sem GID = página do canal mostra "Aguardando dados" (o build segue normalmente). Para
@@ -111,6 +113,7 @@ ligar: preencher o GID em `build/config.py`.
   (gasto de mídia paga ÷ todas as compras) e CR/CPV usam só os page views dos canais pagos.
 - **Visão Geral** ("Acumulado total") = acumulado de todos os canais (+ tabela "Resultado por canal"), com dois filtros no topo da seção: **Tráfego** (Todos/Pago/Orgânico — Pago = canais de mídia paga) e **Canal** por utm_source (Todos/Meta Ads/Google Ads/GPT/Google Org/Direto, via `classify_source` em `build.py`, campo `src` em `ga[]`/`sales[]`); "Remover Filtros" os reseta; **Meta/Google/TikTok** =
   só o respectivo canal.
+- **Mapa por estado (Visão Geral)**: com Tráfego = Pago (ou Canal pago), o tooltip mostra Gasto · Vendas · CAC · Faturamento · ROAS · Ticket Médio. Gasto vem das abas "Local" (`load_geo` em `build.py` → `geo[]`), filtrado por canal; vendas pelo UF da aba Compras. Novos canais: adicionar `GID_GEO_<CANAL>` em config e em `GEO_GIDS`.
 - **Metas e verba** (botão 🎯 na topbar, popup no padrão do seletor de período): meta de investimento mensal (R$) + divisão em % por fonte (Google, Meta, TikTok, Shopee, Amazon, Mercado Livre; soma precisa dar 100%). Salvo só no navegador (`localStorage` `dm_budget`, por dispositivo); mostra o realizado do mês corrente (já com imposto do Meta) para Google/Meta/TikTok. Shopee/Amazon/ML não têm fonte de gasto ainda.
 - **Pace ideal** (dentro do card "Gasto total" de cada página): (verba do mês − gasto até ontem) ÷ dias restantes do mês (hoje incluso). Verba = meta mensal total (Visão Geral) ou meta × % do canal. Só aparece se a meta/% estiver definida em "Metas e verba". Na aba Meta o valor é dividido por `TAX_FACTOR` (= valor a digitar no gerenciador de anúncios, sem imposto), independente do toggle; na Visão Geral é custo real (com imposto do Meta).
 - **Imposto**: `TAX_FACTOR = 1.13806` (+13,806% sobre o gasto do Meta Ads; toggle "Imposto Meta" no topo). Incide só sobre o gasto do Meta. Com 1.0 o toggle some.
