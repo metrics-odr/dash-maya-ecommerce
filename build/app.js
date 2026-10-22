@@ -465,6 +465,19 @@ function initSparkTip(){
   window.addEventListener('scroll',hide,true);
 }
 initSparkTip();
+/* Pace ideal diário = (verba do mês − gasto até ontem) ÷ dias restantes do mês (hoje incluso).
+   Verba: meta mensal total (canal=null) ou meta × % do canal (aba de mídia). Gasto real = com imposto do Meta,
+   sempre (independe do toggle). Na aba Meta o valor é dividido pelo imposto = valor a digitar no gerenciador. */
+function paceIdeal(ch){
+  if(!BUDGET.goal) return null;
+  const pc=ch?(BUDGET.pct[ch]||0):100; if(!pc) return null;
+  const alloc=BUDGET.goal*pc/100, ym=TODAY.slice(0,7), [y,m,d]=TODAY.split('-').map(Number);
+  const days=new Date(y,m,0).getDate()-d+1;
+  const spent=MEDIA.reduce((a,r)=>a+((ch?r.ch===ch:PAID.includes(r.ch))&&r.d&&r.d.slice(0,7)===ym&&r.d<TODAY?r.sp*(r.ch==='meta'?TAX:1):0),0);
+  let v=Math.max(0,alloc-spent)/days;
+  const mgr=ch==='meta'&&TAX!==1; if(mgr) v/=TAX;
+  return {v, tip:`Verba ${brl(alloc)} − gasto até ontem ${brl(spent)} ÷ ${days} dia(s) restante(s)`+(mgr?' · valor sem imposto, para inserir no gerenciador':ch?'':' · com imposto do Meta')};
+}
 /* funil horizontal: KPIs (Gasto/Faturamento/ROAS/Ticket) + etapas em linha, com a taxa de conversão entre elas */
 function renderFunnel(id, steps, dd){
   dd=dd||[];
@@ -476,9 +489,11 @@ function renderFunnel(id, steps, dd){
   const sp=k=>spark(dd.map(ser[k]),dates,fm[k]);
   const sec=(s,i)=>s[2][i]||['',''];
   const pill=x=>`<span class="s-val${x[2]?' s-pill '+x[2]:''}">${x[1]}</span>`;
-  const kpi=(label,val,key,delta,cls,tone)=>`<div class="fk${tone?' tint t-'+tone:''}"><div class="fk-label">${label}</div><div class="fk-val ${cls||''}">${val}</div>${delta?`<div class="m-delta">${delta}</div>`:''}${sp(key)}</div>`;
+  const kpi=(label,val,key,delta,cls,tone,extra)=>`<div class="fk${tone?' tint t-'+tone:''}"><div class="fk-label">${label}</div><div class="fk-val ${cls||''}">${val}</div>${extra||''}${delta?`<div class="m-delta">${delta}</div>`:''}${sp(key)}</div>`;
   const g=st.gasto, f=st.fat, roas=sec(f,0), tick=sec(f,1);
-  const kpis=kpi('Gasto total',g[1],'gasto',g[5],'','red')+kpi('Faturamento',f[1],'fat',f[5],'','green')
+  const pace=paceIdeal(id==='geralFunnel'?null:STATE.page);
+  const paceHtml=pace?`<div class="fk-pace" title="${pace.tip}">Pace ideal: <b>${brl(pace.v)}</b>/dia</div>`:'';
+  const kpis=kpi('Gasto total',g[1],'gasto',g[5],'','red',paceHtml)+kpi('Faturamento',f[1],'fat',f[5],'','green')
     +kpi('ROAS',roas[1],'roas','','roas-v','yellow')+kpi('Ticket médio',tick[1],'ticket');
   const order=['impr','cl','pv','vi','atc','ck','vendas'];
   const stepsHtml=order.map((k,i)=>{
