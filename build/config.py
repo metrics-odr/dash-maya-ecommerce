@@ -27,6 +27,9 @@ GID_SALES = "1836439885"  # OBRIGATÓRIO · aba Compras (1 linha por item: Data 
 GID_META = "1195145852"   # aba "Data Base do Meta Ads" (Day · Campaign Name · Ad Set Name · Ad Name · Amount Spent · Impressions · Link Clicks · ...)
 GID_GOOGLE = "888044421"  # aba Google Ads (Day · Campaign · Ad Group · Ad Name · Cost · Impressions · Clicks)
 GID_TIKTOK = ""       # AGUARDANDO planilha · aba TikTok Ads (mesmo formato do Meta/Google)
+# Gasto por estado (alimenta o mapa da Visão Geral): uma aba por canal, com Estado/Região + Gasto (+ Data, se houver).
+GID_GEO_META = "457716876"    # aba "Local do Meta"
+GID_GEO_GOOGLE = "1126389235"  # aba "Local no Google"
 
 # ==========================================================================
 # 2) REGRAS DE NEGÓCIO

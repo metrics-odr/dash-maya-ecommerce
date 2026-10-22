@@ -537,7 +537,8 @@ const UF_NAME={AC:'Acre',AL:'Alagoas',AP:'Amapá',AM:'Amazonas',BA:'Bahia',CE:'C
 function renderPerfil(){
   const P=(DATA.perfil||[]).filter(r=>dateActive(r.d)&&geralMatch(r));
   const cnt=document.getElementById('perfCount'); if(cnt) cnt.textContent=intf(P.length)+' compras';
-  renderGender(P); renderUfMap(P);
+  const G=(DATA.geo||[]).filter(r=>(!r.d||dateActive(r.d))&&geralMatch(r));
+  renderGender(P); renderUfMap(P,G);
 }
 function renderGender(P){
   const defs=[['m','Homens',cvar('--cc1')],['f','Mulheres',cvar('--cc7')],['nd','Não determinado',cvar('--muted')]];
@@ -551,9 +552,13 @@ function renderGender(P){
   document.getElementById('gGenderLeg').innerHTML=defs.map(d=>
     '<div class="gl"><span class="dot" style="background:'+d[2]+'"></span>'+d[1]+'<b>'+intf(n[d[0]])+' · '+pct(tot?n[d[0]]/tot:null)+'</b></div>').join('');
 }
-function renderUfMap(P){
+function renderUfMap(P,G){
   const by={}; let known=0, fatKnown=0;
   P.forEach(r=>{ if(!r.uf) return; const o=by[r.uf]||(by[r.uf]={n:0,fat:0}); o.n++; o.fat+=r.val; known++; fatKnown+=r.val; });
+  /* gasto por estado (abas "Local" de cada canal; Meta já com o toggle de imposto) — tooltip de CAC/ROAS só no tráfego pago */
+  const spUf={}; let spKnown=0;
+  (G||[]).forEach(r=>{ const v=r.sp*(r.ch==='meta'?taxf():1); spUf[r.uf]=(spUf[r.uf]||0)+v; spKnown+=v; });
+  const showSp=STATE.gTraf==='pago'||PAID.includes(STATE.gSrc);
   const map=document.getElementById('gUfMap'), rank=document.getElementById('gUfRank'), tip=document.getElementById('gUfTip'), note=document.getElementById('gUfNote');
   const max=Math.max(0,...Object.values(by).map(o=>o.n));
   const [r,g,b]=hx2rgb(cvar('--accent-blue'));
@@ -573,6 +578,15 @@ function renderUfMap(P){
       if(o.n/max>0.55) t.setAttribute('class','lt'); lbl.appendChild(t); });
   }
   const show=(uf,ev)=>{ const o=by[uf]||{n:0,fat:0};
+    if(showSp){ const sp=spUf[uf]||0;
+      tip.innerHTML='<div class="t">'+UF_NAME[uf]+' ('+uf+')</div>'+
+        '<div class="r"><span>Gasto</span><b>'+brl(sp)+'</b></div>'+
+        '<div class="r"><span>Vendas</span><b>'+intf(o.n)+'</b></div>'+
+        '<div class="r"><span>CAC</span><b>'+(o.n&&sp?brl(sp/o.n):'—')+'</b></div>'+
+        '<div class="r"><span>Faturamento</span><b>'+brl(o.fat)+'</b></div>'+
+        '<div class="r"><span>ROAS</span><b>'+(sp?(o.fat/sp).toFixed(2).replace('.',',')+'x':'—')+'</b></div>'+
+        '<div class="r"><span>Ticket Médio</span><b>'+(o.n?brl(o.fat/o.n):'—')+'</b></div>';
+    } else
     tip.innerHTML='<div class="t">'+UF_NAME[uf]+' ('+uf+')</div>'+
       '<div class="r"><span>Nº de vendas</span><b>'+intf(o.n)+'</b></div>'+
       '<div class="r"><span>% de vendas</span><b>'+pct(known?o.n/known:null)+'</b></div>'+
@@ -586,7 +600,8 @@ function renderUfMap(P){
   rank.innerHTML=rows.map(([uf,o])=>'<div class="ur"><b>'+uf+'</b><div class="bar"><i style="width:'+(max?o.n/max*100:0).toFixed(1)+'%"></i></div><span>'+pct(known?o.n/known:null)+'</span></div>').join('');
   const sem=P.length-known;
   note.textContent=!P.length?'Sem compras no período.':!known?'A aba Compras não tem coluna de estado (UF) preenchida — adicione uma coluna "Estado" ou "UF" para ver o mapa.':
-    'Percentuais sobre as '+intf(known)+' compras com estado informado'+(sem?' ('+intf(sem)+' sem estado ficaram de fora).':'.');
+    'Percentuais sobre as '+intf(known)+' compras com estado informado'+(sem?' ('+intf(sem)+' sem estado ficaram de fora).':'.')
+    +(showSp?(spKnown?' Gasto por estado vem das abas "Local" (Google e Meta); CAC/ROAS usam só o canal selecionado.':' Sem gasto por estado no período/canal selecionado.'):'');
 }
 
 /* ---------------- PAGE 1: Visão Geral (acumulado de todos os canais) ---------------- */

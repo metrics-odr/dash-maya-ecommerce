@@ -59,6 +59,8 @@ GID_GA4 = cfg.GID_GA4
 GID_META = getattr(cfg, "GID_META", "") or ""
 GID_GOOGLE = getattr(cfg, "GID_GOOGLE", "") or ""
 GID_TIKTOK = getattr(cfg, "GID_TIKTOK", "") or ""
+# abas de gasto por estado (uma por canal; só entram no mapa da Visão Geral)
+GEO_GIDS = {"meta": getattr(cfg, "GID_GEO_META", "") or "", "google": getattr(cfg, "GID_GEO_GOOGLE", "") or ""}
 TAX_FACTOR = cfg.TAX_FACTOR
 COUNT_ALL_AS_PAID = cfg.COUNT_ALL_AS_PAID
 CLIENT_NAME = cfg.CLIENT_NAME
@@ -578,7 +580,33 @@ def load_sales(rows, media):
     return sales, buyers, perfil_l
 
 
-def process(media_rows, ga_rows, sales_rows):
+def load_geo(rows, ch):
+    """Aba de gasto por estado de um canal -> [{d,ch,uf,sp}]. Tolerante: acha a linha de cabeçalho nas
+    primeiras 10 linhas e aceita nome do estado ou UF; linhas sem estado reconhecido são ignoradas."""
+    wanted = {"day": ["day", "data", "date", "dia"],
+              "uf": ["region", "regiao", "estado", "state", "uf", "province", "user location", "location", "localizacao"],
+              "spent": ["amount spent", "cost (spend)", "cost", "spend", "valor gasto", "gasto", "custo"]}
+    hdr, gidx = None, None
+    for i, row in enumerate(rows[:10]):
+        idx = header_index(row, wanted, {})
+        if idx["uf"] is not None and idx["spent"] is not None:
+            hdr, gidx = i, idx
+            break
+    if hdr is None:
+        return []
+    out = []
+    for row in rows[hdr + 1:]:
+        uf = normalize_uf(re.sub(r"^(state of|estado de|estado do|estado da)\s+", "", norm(cell(row, gidx["uf"]))))
+        if not uf or is_test_row(" ".join(str(c) for c in row)):
+            continue
+        sp = to_float(cell(row, gidx["spent"]))
+        if sp:
+            out.append({"d": (parse_date(cell(row, gidx["day"])) if gidx["day"] is not None else None) or "",
+                        "ch": ch, "uf": uf, "sp": round(sp, 4)})
+    return out
+
+
+def process(media_rows, ga_rows, sales_rows, geo_rows=None):
     """media_rows = {"meta": rows|None, "google": rows|None, "tiktok": rows|None}"""
     media, ad_links = [], {}
     for ch in CHANNELS:
@@ -588,6 +616,9 @@ def process(media_rows, ga_rows, sales_rows):
     ga = load_ga4(ga_rows)
     sales, buyers, perfil = load_sales(sales_rows, media)
 
+    geo = []
+    for ch, rows in (geo_rows or {}).items():
+        geo += load_geo(rows or [], ch)
     dates = sorted({r["d"] for r in media + ga + sales if r["d"]})
     now_brt = datetime.now(BRT)
     return {
@@ -614,6 +645,7 @@ def process(media_rows, ga_rows, sales_rows):
         "sales": sales,
         "buyers": buyers,
         "perfil": perfil,
+        "geo": geo,
         "ad_links": ad_links,
         # Briefings do Gestor por período (build/relatorios.json); {} se não existir.
         "briefings": {},
@@ -670,6 +702,8 @@ def main():
     ap.add_argument("--meta-file")
     ap.add_argument("--google-file")
     ap.add_argument("--tiktok-file")
+    ap.add_argument("--geo-meta-file")
+    ap.add_argument("--geo-google-file")
     ap.add_argument("--ga4-file")
     ap.add_argument("--sales-file")
     ap.add_argument("--template", default="build/template.html")
@@ -683,7 +717,11 @@ def main():
         media_rows[ch] = load_rows(EXPORT_URL.format(sid=SPREADSHEET_ID, gid=gid), local) if (gid or local) else []
     ga_rows = load_rows(EXPORT_URL.format(sid=SPREADSHEET_ID, gid=GID_GA4), args.ga4_file)
     sales_rows = load_rows(EXPORT_URL.format(sid=SPREADSHEET_ID, gid=GID_SALES), args.sales_file)
-    data = process(media_rows, ga_rows, sales_rows)
+    geo_rows = {}
+    for ch, local in (("meta", args.geo_meta_file), ("google", args.geo_google_file)):
+        gid = GEO_GIDS[ch]
+        geo_rows[ch] = load_rows(EXPORT_URL.format(sid=SPREADSHEET_ID, gid=gid), local) if (gid or local) else []
+    data = process(media_rows, ga_rows, sales_rows, geo_rows)
 
     # Briefings do Gestor (texto por IA, gerado 1x/dia pela Routine) — lidos do
     # arquivo versionado ao lado do template. Sem chamada de API no build.
