@@ -126,6 +126,18 @@
         </div>
         </div>
 
+        <h2 class="sec-title">Perfil dos compradores <span class="pill q" id="perfCount"></span></h2>
+        <div class="perfil-grid">
+          <div class="card"><h3>Gênero</h3><p class="hint">Estimado pelo nome e e-mail do comprador · 1 pedido = 1 comprador</p>
+            <div class="gender-wrap"><div class="chart-box chart-sm gender-chart"><canvas id="gGender"></canvas></div><div class="gender-legend" id="gGenderLeg"></div></div>
+          </div>
+          <div class="card"><h3>Estado</h3><p class="hint">% das vendas por estado · passe o mouse para ver detalhes</p>
+            <div class="uf-wrap" id="gUfWrap"><div class="uf-map" id="gUfMap"></div><div class="uf-rank" id="gUfRank"></div></div>
+            <div class="uf-tip" id="gUfTip" hidden></div>
+            <p class="note" id="gUfNote"></p>
+          </div>
+        </div>
+
         <h2 class="sec-title">Indicadores por dia</h2>
         <div class="funnel-charts">
           <div class="card"><h3>CPM e CTR por dia</h3><p class="hint">CPM (R$, esq.) · CTR (%, dir.)</p><div class="chart-box chart-sm"><canvas id="gCpmCtr"></canvas></div></div>

@@ -531,6 +531,64 @@ function convCharts(ids,dd){
      {label:'Compras/Page View',fn:x=>x.pv?+(x.vendas/x.pv).toFixed(4):null,color:cvar('--chart-cr'),fmt:'pct',axis:'L'}], {L:{fmt:'pct'}});
 }
 
+
+/* ---------------- Perfil dos compradores (gênero + estado) — Visão Geral ---------------- */
+const UF_NAME={AC:'Acre',AL:'Alagoas',AP:'Amapá',AM:'Amazonas',BA:'Bahia',CE:'Ceará',DF:'Distrito Federal',ES:'Espírito Santo',GO:'Goiás',MA:'Maranhão',MT:'Mato Grosso',MS:'Mato Grosso do Sul',MG:'Minas Gerais',PA:'Pará',PB:'Paraíba',PR:'Paraná',PE:'Pernambuco',PI:'Piauí',RJ:'Rio de Janeiro',RN:'Rio Grande do Norte',RS:'Rio Grande do Sul',RO:'Rondônia',RR:'Roraima',SC:'Santa Catarina',SP:'São Paulo',SE:'Sergipe',TO:'Tocantins'};
+function renderPerfil(){
+  const P=(DATA.perfil||[]).filter(r=>dateActive(r.d)&&geralMatch(r));
+  const cnt=document.getElementById('perfCount'); if(cnt) cnt.textContent=intf(P.length)+' compras';
+  renderGender(P); renderUfMap(P);
+}
+function renderGender(P){
+  const defs=[['m','Homens',cvar('--cc1')],['f','Mulheres',cvar('--cc7')],['nd','Não determinado',cvar('--muted')]];
+  const n={m:0,f:0,nd:0}; P.forEach(r=>{ n[r.g in n?r.g:'nd']++; });
+  const tot=P.length;
+  destroy('gGender'); const el=document.getElementById('gGender'); if(!el) return;
+  charts.gGender=new Chart(el,{type:'pie',
+    data:{labels:defs.map(d=>d[1]),datasets:[{data:defs.map(d=>n[d[0]]),backgroundColor:defs.map(d=>d[2]),borderColor:cvar('--surface'),borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
+      tooltip:{callbacks:{label:c=>c.label+': '+intf(c.raw)+' ('+pct(tot?c.raw/tot:null)+')'}}}}});
+  document.getElementById('gGenderLeg').innerHTML=defs.map(d=>
+    '<div class="gl"><span class="dot" style="background:'+d[2]+'"></span>'+d[1]+'<b>'+intf(n[d[0]])+' · '+pct(tot?n[d[0]]/tot:null)+'</b></div>').join('');
+}
+function renderUfMap(P){
+  const by={}; let known=0, fatKnown=0;
+  P.forEach(r=>{ if(!r.uf) return; const o=by[r.uf]||(by[r.uf]={n:0,fat:0}); o.n++; o.fat+=r.val; known++; fatKnown+=r.val; });
+  const map=document.getElementById('gUfMap'), rank=document.getElementById('gUfRank'), tip=document.getElementById('gUfTip'), note=document.getElementById('gUfNote');
+  const max=Math.max(0,...Object.values(by).map(o=>o.n));
+  const [r,g,b]=hx2rgb(cvar('--accent-blue'));
+  const shade=n=>{ const a=n&&max?0.18+0.82*(n/max):0; return a?'rgba('+r+','+g+','+b+','+a.toFixed(2)+')':cgrid(); };
+  const svg=['<svg viewBox="0 0 '+BR_MAP.vb[0]+' '+BR_MAP.vb[1]+'" role="img" aria-label="Mapa de vendas por estado">'];
+  Object.keys(BR_MAP.paths).forEach(uf=>{ const o=by[uf]; svg.push('<path data-uf="'+uf+'" d="'+BR_MAP.paths[uf]+'" fill="'+shade(o&&o.n)+'"/>'); });
+  svg.push('<g id="gUfLbl"></g></svg>');
+  map.innerHTML=svg.join('');
+  /* rótulo (UF + %) no centro de cada estado, após inserir no DOM para medir o bbox */
+  const lbl=map.querySelector('#gUfLbl'), s=map.querySelector('svg');
+  if(known){
+    map.querySelectorAll('path').forEach(p=>{ const uf=p.dataset.uf, o=by[uf]; if(!o) return;
+      let bb; try{ bb=p.getBBox(); }catch(e){ return; }
+      const small=bb.width<34||bb.height<30, t=document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x',(bb.x+bb.width/2).toFixed(1)); t.setAttribute('y',(bb.y+bb.height/2+3).toFixed(1));
+      t.textContent=small?pct(o.n/known).replace(',00',''):uf+' '+pct(o.n/known).replace(',00','');
+      if(o.n/max>0.55) t.setAttribute('class','lt'); lbl.appendChild(t); });
+  }
+  const show=(uf,ev)=>{ const o=by[uf]||{n:0,fat:0};
+    tip.innerHTML='<div class="t">'+UF_NAME[uf]+' ('+uf+')</div>'+
+      '<div class="r"><span>Nº de vendas</span><b>'+intf(o.n)+'</b></div>'+
+      '<div class="r"><span>% de vendas</span><b>'+pct(known?o.n/known:null)+'</b></div>'+
+      '<div class="r"><span>Faturamento</span><b>'+brl(o.fat)+'</b></div>'+
+      '<div class="r"><span>% do faturamento</span><b>'+pct(fatKnown?o.fat/fatKnown:null)+'</b></div>';
+    tip.hidden=false; const w=tip.offsetWidth,h=tip.offsetHeight;
+    tip.style.left=Math.min(ev.clientX+14,innerWidth-w-8)+'px'; tip.style.top=Math.min(ev.clientY+14,innerHeight-h-8)+'px'; };
+  s.addEventListener('mousemove',e=>{ const p=e.target.closest('path'); if(p) show(p.dataset.uf,e); else tip.hidden=true; });
+  s.addEventListener('mouseleave',()=>{ tip.hidden=true; });
+  const rows=Object.entries(by).sort((a,b)=>b[1].n-a[1].n);
+  rank.innerHTML=rows.map(([uf,o])=>'<div class="ur"><b>'+uf+'</b><div class="bar"><i style="width:'+(max?o.n/max*100:0).toFixed(1)+'%"></i></div><span>'+pct(known?o.n/known:null)+'</span></div>').join('');
+  const sem=P.length-known;
+  note.textContent=!P.length?'Sem compras no período.':!known?'A aba Compras não tem coluna de estado (UF) preenchida — adicione uma coluna "Estado" ou "UF" para ver o mapa.':
+    'Percentuais sobre as '+intf(known)+' compras com estado informado'+(sem?' ('+intf(sem)+' sem estado ficaram de fora).':'.');
+}
+
 /* ---------------- PAGE 1: Visão Geral (acumulado de todos os canais) ---------------- */
 function renderGeral(){
   renderGeralFilters();
@@ -540,6 +598,7 @@ function renderGeral(){
   const dd=daily(S.fS,S.fM,S.fG);
   renderFunnel('geralFunnel', funnelSteps(t, tp, false), dd);
   convCharts(['gCpmCtr','gCrPvr','gAcrChk','gConv'], dd);
+  renderPerfil();
   renderGranDD('gCombo'); comboChart('gCombo', dd);
   renderProdTable('gProd', S.fS);
 
