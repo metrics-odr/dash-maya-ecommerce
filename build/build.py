@@ -182,6 +182,102 @@ def first_last_initial(name: str) -> str:
 
 
 # --------------------------------------------------------------------------- #
+# Perfil dos compradores: gênero (por nome/e-mail) e UF
+# --------------------------------------------------------------------------- #
+_UFS = {"AC": "acre", "AL": "alagoas", "AP": "amapa", "AM": "amazonas", "BA": "bahia", "CE": "ceara",
+        "DF": "distrito federal", "ES": "espirito santo", "GO": "goias", "MA": "maranhao", "MT": "mato grosso",
+        "MS": "mato grosso do sul", "MG": "minas gerais", "PA": "para", "PB": "paraiba", "PR": "parana",
+        "PE": "pernambuco", "PI": "piaui", "RJ": "rio de janeiro", "RN": "rio grande do norte",
+        "RS": "rio grande do sul", "RO": "rondonia", "RR": "roraima", "SC": "santa catarina",
+        "SP": "sao paulo", "SE": "sergipe", "TO": "tocantins"}
+_UF_BY_NAME = {v: k for k, v in _UFS.items()}
+
+
+def normalize_uf(v: str) -> str:
+    """'SP', 'sp', 'São Paulo', 'Sao Paulo - SP' -> 'SP'; desconhecido -> ''."""
+    v = norm(v or "")
+    if not v:
+        return ""
+    if v.upper() in _UFS:
+        return v.upper()
+    if v in _UF_BY_NAME:
+        return _UF_BY_NAME[v]
+    m = re.search(r"\b([a-z]{2})$", v)
+    if m and m.group(1).upper() in _UFS:
+        return m.group(1).upper()
+    return _UF_BY_NAME.get(re.sub(r"\s*[-/,(].*$", "", v).strip(), "")
+
+
+_FEM = set("""maria ana julia juliana fernanda amanda patricia camila mariana beatriz luciana aline bruna carolina
+daniela renata vanessa leticia larissa gabriela jessica natalia priscila tatiane tatiana thais thaisa isabela isabel
+isabella isadora raquel rafaela rebeca sandra simone sonia sabrina silvia viviane vivian luana luiza luisa laura lais
+livia lorena manuela marcela marina marta michele michelle monica nathalia paula paloma pamela paola rosa rose rosana
+rosangela sara sarah talita tais yasmin yara andreia andrea adriana alessandra alice amelia angela angelica barbara
+bianca bruna carla carmen cecilia claudia cristiane cristina debora denise diana eduarda elaine eliane elisa elizabeth
+elisabete erica eva fabiana fabricia fatima flavia francisca gisele giovana giovanna helena heloisa ingrid irene
+iris janaina jaqueline joana juliane kelly karina katia keila lara leila lidiane liliane lilian lucia lucimara luzia
+magda mara margarida marilia marisa mayara melissa milena miriam monique nadia natasha nicole olivia patrícia pietra
+poliana rafaela regina roberta rosemary samara selma sheila silmara stella stephanie suelen suzana tereza teresa
+valeria vera veronica vitoria wanessa zilda ester esther emilia emily evelyn eloisa clara clarice dandara debora
+gleice graziela gisela jade kamila kamilla laiza lavinia lilia luma maiara maisa maite manoela maria nayara nara
+neusa nilza noemi odete paulina rita roseli rosimeire sueli suely tamires thamires thalita thayna thaina vitória
+yohana ariane ariadne bia bruna cintia cinthia cleide dayane dayana edna eliana fabiola gabrielle jennifer joice
+josiane kaila kauane kelen kethlen leidiane lenita lidia lourdes madalena marlene mirela nair noelia otavia pricila
+priscilla rayane rosilene rute ruth sirlene solange sonia tamara tatiele telma thalia valentina vania vilma wendy""".split())
+_MASC = set("""joao jose antonio francisco carlos paulo pedro lucas luiz luis marcos luciano gabriel rafael daniel marcelo
+bruno eduardo felipe filipe rodrigo manoel manuel jorge fernando fabio leandro gustavo andre anderson ricardo
+roberto sergio alexandre alex diego thiago tiago vinicius vitor victor guilherme henrique matheus mateus leonardo
+renato rogerio claudio cesar augusto adriano alan alberto alisson amilton ariel arthur artur benedito caio carlo
+celso cleber cristiano danilo davi david denis diogo douglas edson edgar edmilson elias emerson enzo erick erik
+evandro fabricio flavio francisco geraldo german gilberto gilson heitor helio hugo igor isaac ivan jonas jonathan
+junior kaio kleber leonel lourival marcio mario mauricio mauro miguel murilo nelson nicolas otavio patrick paulo
+raul renan reinaldo robson rubens samuel saulo sebastiao silvio stefano tales tarcisio thales ulisses valter
+vagner valdir wagner walter wellington wesley willian william wilson yuri zeca ronaldo rodolfo rubem sandro
+jeferson jefferson joel jonatan josue juan juliano lauro lazaro lindomar luan lucio marlon moises natan nathan
+neto noel osvaldo oswaldo pablo percival ramon raimundo reginaldo ruan rui tadeu tulio vando vicente washington
+orlando olavo otto levi lorenzo bento benicio theo breno cauan cauã dante enrico heitor joaquim henry thomas""".split())
+_NAME_STOP = {"sr", "sra", "dr", "dra", "srta", "prof", "de", "da", "do", "dos", "das"}
+
+
+def _guess_first(token: str) -> str:
+    """'F'/'M'/'' para um primeiro nome (dicionário + terminações do português)."""
+    t = norm(token)
+    t = re.sub(r"[^a-z]", "", t)
+    if len(t) < 2:
+        return ""
+    if t in _FEM:
+        return "F"
+    if t in _MASC:
+        return "M"
+    if t.endswith(("ssa", "ele", "ine", "ane", "ana", "ene", "ice", "ila", "ola", "ula", "ela", "ura", "iza",
+                   "eia", "ria", "lia", "nia", "cia", "dia", "tia", "via", "sia", "gia", "bia", "mia")):
+        return "F"
+    if t.endswith("a") and t not in ("luca", "joshua", "garcia", "costa"):
+        return "F"
+    if t.endswith(("o", "os", "son", "ton", "ldo", "rto", "lio", "rio", "ano", "avo", "ilo", "elo", "eu", "ur", "ir", "or", "el", "im", "an")):
+        return "M"
+    return ""
+
+
+def guess_gender(name: str, email: str = "") -> str:
+    """'f' | 'm' | 'nd'. Usa o 1º nome; se não decidir, tenta o início do e-mail. Nunca sai do navegador
+    nem do JSON como dado pessoal — só a letra final é exportada."""
+    toks = [t for t in re.split(r"[\s._-]+", norm(name or "")) if t and t not in _NAME_STOP]
+    for t in toks[:1]:
+        g = _guess_first(t)
+        if g:
+            return g.lower()
+    local = norm((email or "").split("@")[0])
+    for t in re.split(r"[._\-\d]+", local)[:2]:
+        if len(t) >= 3:
+            g = _guess_first(t)
+            if g and (t in _FEM or t in _MASC):
+                return g.lower()
+    return "nd"
+
+
+
+# --------------------------------------------------------------------------- #
 # Indexação de colunas (por nome, com fallback posicional)
 # --------------------------------------------------------------------------- #
 def header_index(header, wanted, fallback):
@@ -368,7 +464,7 @@ def load_sales(rows, media):
     conjunto, anúncio, produto) com `main` = nº de PEDIDOS (Order ID distintos), `val` =
     faturamento (soma dos itens) e `n` = itens. Mais `buyers` (últimos pedidos, PII mascarada)."""
     if not rows:
-        return [], []
+        return [], [], []
     sidx = header_index(
         rows[0],
         {"created": ["data de criacao", "data", "created", "created_time"],
@@ -382,9 +478,15 @@ def load_sales(rows, media):
          "utm_campaign": ["utm campaign", "utm_campaign"],
          "utm_content": ["utm content", "utm_content"],
          "utm_term": ["utm term", "utm_term"],
-         "status": ["status"]},
+         "status": ["status"],
+         "uf": ["cliente / estado", "estado", "state", "provincia", "province"]},
         {"created": 0, "name": 1, "email": 2, "prod": 4, "val": 5, "order": 11})
     # campanha (normalizada) -> (canal, nome real) vindo das abas de mídia; ambígua entre canais = ignora
+    if sidx.get("uf") is None:           # coluna "UF" exata (substring "uf" seria arriscado)
+        for i, h in enumerate(rows[0]):
+            if norm(h) in ("uf", "cliente / uf", "estado (uf)"):
+                sidx["uf"] = i
+                break
     camp_map, ad_map, adname_map = {}, {}, {}
     for m in media:
         if m["ch"] == "meta" and m["ad"] != "(sem anúncio)":
@@ -396,6 +498,7 @@ def load_sales(rows, media):
             camp_map.setdefault(k, (m["ch"], m["camp"]))
         ad_map.setdefault((norm(m["camp"]), norm(m["ad"])), m["adset"])
 
+    perfil = {}                    # order_id -> {d,ch,src,g,uf,val} (sem PII: só gênero e UF)
     order_attr = {}                # order_id -> atributos do 1º item (data/canal/campanha)
     groups = {}                    # chave de agregação -> registro
     buyers = []
@@ -444,6 +547,11 @@ def load_sales(rows, media):
         g["val"] += val
         g["n"] += 1
         if first:
+            perfil[oid] = {"d": at["d"], "ch": at["ch"], "src": at["src"],
+                           "g": guess_gender(cell(row, sidx["name"]), cell(row, sidx["email"])),
+                           "uf": normalize_uf(cell(row, sidx["uf"])), "val": 0.0}
+        perfil[oid]["val"] += val
+        if first:
             g["main"] += 1
             buyers.append({"d": at["d"], "ch": at["ch"], "camp": at["camp"], "ad": at["ad"], "prod": prod,
                            "oid": oid, "val": val,
@@ -464,7 +572,10 @@ def load_sales(rows, media):
     for b in buyers:
         b["val"] = round(b["val"], 2)
         del b["oid"]
-    return sales, buyers
+    perfil_l = list(perfil.values())
+    for p in perfil_l:
+        p["val"] = round(p["val"], 2)
+    return sales, buyers, perfil_l
 
 
 def process(media_rows, ga_rows, sales_rows):
@@ -475,7 +586,7 @@ def process(media_rows, ga_rows, sales_rows):
         media += recs
         ad_links.update(links)
     ga = load_ga4(ga_rows)
-    sales, buyers = load_sales(sales_rows, media)
+    sales, buyers, perfil = load_sales(sales_rows, media)
 
     dates = sorted({r["d"] for r in media + ga + sales if r["d"]})
     now_brt = datetime.now(BRT)
@@ -502,6 +613,7 @@ def process(media_rows, ga_rows, sales_rows):
         "ga": ga,
         "sales": sales,
         "buyers": buyers,
+        "perfil": perfil,
         "ad_links": ad_links,
         # Briefings do Gestor por período (build/relatorios.json); {} se não existir.
         "briefings": {},
@@ -545,7 +657,8 @@ def render(data, template_path):
         tpl = f.read()
     styles = readf("identidade-visual.css") + "\n" + readf("estilos.css")
     tpl = tpl.replace("__STYLES__", styles)
-    tpl = tpl.replace("__APP_JS__", readf("app.js"))
+    # mapa-brasil.js entra logo após o "use strict" de app.js (BR_MAP usado pela seção Perfil dos compradores)
+    tpl = tpl.replace("__APP_JS__", readf("app.js").replace('"use strict";', '"use strict";\n' + readf("mapa-brasil.js"), 1))
     tpl = tpl.replace("__DATA_JSON__", json.dumps(data, ensure_ascii=False).replace("</", "<\\/"))
     tpl = tpl.replace("__BUILD_ID__", data["build"]["build_id"])
     tpl = tpl.replace("__GENERATED_BRT__", data["build"]["generated_at_brt"])
