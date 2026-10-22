@@ -111,7 +111,7 @@ ligar: preencher o GID em `build/config.py`.
   (gasto de mídia paga ÷ todas as compras) e CR/CPV usam só os page views dos canais pagos.
 - **Visão Geral** ("Acumulado total") = acumulado de todos os canais (+ tabela "Resultado por canal"), com dois filtros no topo da seção: **Tráfego** (Todos/Pago/Orgânico — Pago = canais de mídia paga) e **Canal** por utm_source (Todos/Meta Ads/Google Ads/GPT/Google Org/Direto, via `classify_source` em `build.py`, campo `src` em `ga[]`/`sales[]`); "Remover Filtros" os reseta; **Meta/Google/TikTok** =
   só o respectivo canal.
-- **Imposto**: `TAX_FACTOR = 1.0` (sem imposto; o toggle some). Se > 1, incide só sobre o gasto do Meta.
+- **Imposto**: `TAX_FACTOR = 1.13806` (+13,806% sobre o gasto do Meta Ads; toggle "Imposto Meta" no topo). Incide só sobre o gasto do Meta. Com 1.0 o toggle some.
 - **Sem metas** de CAC/ROAS por enquanto (`0.0`): a Saúde do funil usa o histórico da conta.
 - **Indicativo ATIVO/PAUSADO** e **HR/BR/ER** (retenção de vídeo): aparecem no Meta se a planilha tiver as
   colunas (resolvido no navegador; nunca agregue status por nome no `build.py`).

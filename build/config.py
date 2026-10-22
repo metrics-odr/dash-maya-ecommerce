@@ -34,7 +34,7 @@ GID_TIKTOK = ""       # AGUARDANDO planilha · aba TikTok Ads (mesmo formato do 
 # Fator de imposto aplicado sobre o gasto do Meta Ads quando o toggle
 # "Imposto Meta" estiver ligado. Use 1.0 se o cliente não tiver imposto
 # (com 1.0 o toggle some da interface).
-TAX_FACTOR = 1.0
+TAX_FACTOR = 1.13806   # +13,806% sobre o gasto do Meta Ads
 TAX_LABEL = "Imposto Meta"
 
 # A aba Compras é uma lista de pedidos concretizados (sem coluna de status
