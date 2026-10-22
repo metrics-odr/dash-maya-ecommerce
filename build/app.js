@@ -598,17 +598,33 @@ function renderUfMap(P,G){
   s.addEventListener('mouseleave',()=>{ tip.hidden=true; });
   const rows=Object.entries(by).sort((a,b)=>b[1].n-a[1].n);
   rank.innerHTML=rows.map(([uf,o])=>'<div class="ur"><b>'+uf+'</b><div class="bar"><i style="width:'+(max?o.n/max*100:0).toFixed(1)+'%"></i></div><span>'+pct(known?o.n/known:null)+'</span></div>').join('');
-  /* tabela por estado: Estado · Gasto · Vendas · CAC · Fat · Ticket · ROAS */
+  /* tabela por estado: Estado · Gasto · Vendas · CAC · Fat · Ticket · ROAS (colunas ordenáveis) */
   const tbl=document.getElementById('gUfTbl');
   if(tbl){
     const ufs=[...new Set([...Object.keys(by),...Object.keys(spUf)])].filter(u=>UF_NAME[u]);
-    const cell=(sp,n,fat)=>'<td>'+(sp?brl(sp):'—')+'</td><td>'+intf(n)+'</td><td>'+(n&&sp?brl(sp/n):'—')+'</td><td>'+(n?brl(fat):'—')+'</td><td>'+(n?brl(fat/n):'—')+'</td><td>'+(sp&&fat?roasf(fat/sp):'—')+'</td>';
-    const trs=ufs.map(u=>({u,sp:spUf[u]||0,n:(by[u]||{}).n||0,fat:(by[u]||{}).fat||0})).sort((a,b)=>b.sp-a.sp||b.n-a.n)
-      .map(o=>'<tr title="'+UF_NAME[o.u]+'"><td class="dim uf-uf">'+o.u+'</td>'+cell(o.sp,o.n,o.fat)+'</tr>').join('');
-    tbl.classList.add('uf-dt');
-    tbl.innerHTML='<thead><tr><th class="dim">Estado</th><th>Gasto</th><th>Vendas</th><th>CAC</th><th>Fat.</th><th>Ticket</th><th>ROAS</th></tr></thead>'+
-      '<tbody>'+(trs||'<tr><td colspan="7" class="dim">Sem dados por estado no período.</td></tr>')+'</tbody>'+
-      (trs?'<tfoot><tr><td class="dim">Total</td>'+cell(spKnown,known,fatKnown)+'</tr></tfoot>':'');
+    const data=ufs.map(u=>{ const sp=spUf[u]||0, n=(by[u]||{}).n||0, fat=(by[u]||{}).fat||0;
+      return {u,sp,n,fat,cac:n&&sp?sp/n:null,tk:n?fat/n:null,roas:sp&&fat?fat/sp:null}; });
+    const cols=[['u','Estado'],['sp','Gasto'],['n','Vendas'],['cac','CAC'],['fat','Fat.'],['tk','Ticket'],['roas','ROAS']];
+    const cell=(o,tot)=>'<td>'+(o.sp?brl(o.sp):'—')+'</td><td>'+intf(o.n)+'</td><td>'+(o.cac!=null?brl(o.cac):'—')+'</td><td>'+(o.n?brl(o.fat):'—')+'</td><td>'+(o.tk!=null?brl(o.tk):'—')+'</td><td>'+(o.roas!=null?roasf(o.roas):'—')+'</td>';
+    const draw=()=>{
+      const st=STATE.sort.gUfTbl, rows=data.slice();
+      if(st) rows.sort((a,b)=>{ if(st.key==='u') return st.dir==='asc'?a.u.localeCompare(b.u):b.u.localeCompare(a.u);
+        const va=a[st.key]==null?-Infinity:a[st.key], vb=b[st.key]==null?-Infinity:b[st.key]; return st.dir==='asc'?va-vb:vb-va; });
+      else rows.sort((a,b)=>b.sp-a.sp||b.n-a.n);
+      const tot={sp:spKnown,n:known,fat:fatKnown,cac:known&&spKnown?spKnown/known:null,tk:known?fatKnown/known:null,roas:spKnown&&fatKnown?fatKnown/spKnown:null};
+      tbl.classList.add('uf-dt');
+      tbl.innerHTML='<colgroup><col style="width:9%"><col style="width:17%"><col style="width:10%"><col style="width:16%"><col style="width:17%"><col style="width:16%"><col style="width:15%"></colgroup>'+
+        '<thead><tr>'+cols.map(([k,l])=>'<th data-k="'+k+'" class="'+(k==='u'?'dim ':'')+(st&&st.key===k?(st.dir==='asc'?'sorted-asc':'sorted-desc'):'')+'">'+l+'</th>').join('')+'</tr></thead>'+
+        '<tbody>'+(rows.length?rows.map(o=>'<tr title="'+UF_NAME[o.u]+'"><td class="dim uf-uf">'+o.u+'</td>'+cell(o)+'</tr>').join(''):'<tr><td colspan="7" class="dim">Sem dados por estado no período.</td></tr>')+'</tbody>'+
+        (rows.length?'<tfoot><tr><td class="dim">Total</td>'+cell(tot)+'</tr></tfoot>':'');
+      tbl.querySelectorAll('thead th').forEach(th=>th.addEventListener('click',()=>{
+        const k=th.dataset.k, cur=STATE.sort.gUfTbl, first=k==='u'?'asc':'desc';
+        if(!cur||cur.key!==k) STATE.sort.gUfTbl={key:k,dir:first};
+        else if(cur.dir===first) STATE.sort.gUfTbl={key:k,dir:first==='asc'?'desc':'asc'};
+        else delete STATE.sort.gUfTbl;
+        draw(); }));
+    };
+    draw();
   }
   const sem=P.length-known;
   note.textContent=!P.length?'Sem compras no período.':!known?'A aba Compras não tem coluna de estado (UF) preenchida — adicione uma coluna "Estado" ou "UF" para ver o mapa.':
