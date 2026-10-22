@@ -57,6 +57,31 @@
           </div>
         </div>
       </div>
+      <div class="period-picker" id="budgetPicker">
+        <button class="btn period-btn" id="budgetBtn" aria-haspopup="true" aria-expanded="false">
+          <span class="period-ic">🎯</span>
+          <span class="period-label" id="budgetBtnLabel">Metas e verba</span>
+          <span class="period-caret">▾</span>
+        </button>
+        <div class="period-pop budget-pop" id="budgetPop" hidden>
+          <div class="bp-body">
+            <label class="bp-goal">
+              <span class="bp-title">Meta de investimento mensal</span>
+              <span class="bp-money"><span>R$</span><input type="text" inputmode="decimal" id="bpGoal" placeholder="0,00" autocomplete="off"></span>
+            </label>
+            <div class="bp-head"><span>Divisão da verba por fonte de tráfego</span><span class="bp-head-r">% · valor</span></div>
+            <div class="bp-rows" id="bpRows"></div>
+          </div>
+          <div class="pp-foot">
+            <div class="pp-range" id="bpTotal"></div>
+            <div class="pp-actions">
+              <button class="btn" id="bpClear">Limpar</button>
+              <button class="btn" id="bpCancel">Cancelar</button>
+              <button class="btn primary" id="bpApply">Salvar</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <button class="btn" id="clearBtn">Remover Filtros</button>
       <div class="sep"></div>
       <div class="tax-toggle" id="taxToggle"><div class="toggle-track"><div class="toggle-thumb"></div></div><span class="toggle-label" id="taxLabel"></span></div>
