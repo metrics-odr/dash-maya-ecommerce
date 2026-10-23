@@ -81,6 +81,7 @@ leitura via export CSV (link público).
 |-----|-----|----------------|
 | **Google Ads📥** | `GID_GOOGLE` = 888044421 | Day · Campaign · Ad Group · Ad Name · Cost (Spend) · Impressions · Clicks |
 | **GA4 📥** | `GID_GA4` = 1669456740 | Date · Event name · Session source/medium · Event count · **Sessions** · Total users |
+| **Google Ads - SHOP E PMAX📥** | `GID_GOOGLE_SHOP` = 1783811121 | Day · Campaign Name · Cost (Spend) · Impressions · Clicks — soma ao canal Google só campanhas Shopping/PMax (regex `GOOGLE_SHOP_PATTERN` no nome); ignora pesquisa e campanhas já presentes na aba geral (dedupe por nome) |
 | **Compras 🛒** | `GID_SALES` = 1836439885 | Data · Nome · Email · Produto · **Preço** · **Order ID** · utm_source/campaign/medium/term/content |
 | **Meta Ads📥** | `GID_META` = 1195145852 | Day · Campaign Name · Ad Set Name · Ad Name · Amount Spent · Impressions · Link Clicks · vídeo · status · permalink |
 | **Local no Google** | `GID_GEO_GOOGLE` = 1126389235 | Estado/Região · Gasto (+ Data) — gasto por estado, alimenta o tooltip do mapa |
