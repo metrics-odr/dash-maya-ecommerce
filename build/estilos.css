@@ -140,7 +140,7 @@
   .funnel-grid{grid-template-columns:minmax(0,1fr); align-items:start}
   .funnel-charts{display:grid; grid-template-columns:1fr 1fr; gap:16px; align-content:start}
   /* Resultado por canal (esq., encolhe/rola) + Compras por produto (dir., cabe inteira); mesma altura */
-  .chan-prod{display:grid; grid-template-columns:minmax(0,1fr) minmax(400px,32%); gap:16px; align-items:stretch}
+  .chan-prod{display:grid; grid-template-columns:minmax(0,1.7fr) minmax(0,1fr); gap:16px; align-items:stretch}
   .chan-prod>div{display:flex; flex-direction:column; min-width:0}
   .chan-prod{margin-top:22px}
   .chan-prod>div>.sec-title{margin-top:0}
@@ -267,6 +267,13 @@
   table.dt tbody tr.sel{background:var(--selected)}
   table.dt tfoot td{position:sticky; bottom:0; background:var(--tfoot); font-weight:700; border-top:2px solid var(--border); text-align:right}
   table.dt tfoot td.dim{text-align:left}
+  /* modo fit (Resultado por canal / Compras por produto): cabe no card, sem scroll lateral */
+  table.dt.fit{font-size:11.5px; min-width:0}
+  table.dt.fit th, table.dt.fit td{padding:7px 5px}
+  table.dt.fit thead th{font-size:9.5px; letter-spacing:0; white-space:normal; line-height:1.15; vertical-align:bottom}
+  table.dt.fit th:first-child, table.dt.fit td:first-child{padding-left:10px}
+  table.dt.fit th:last-child, table.dt.fit td:last-child{padding-right:10px}
+  .chan-prod .tbl-wrap{overflow-x:hidden}
   #gDaily th, #gDaily td, #tDaily th, #tDaily td{text-align:center}
   #gDaily th.dim, #gDaily td.dim, #tDaily th.dim, #tDaily td.dim{text-align:center}
   #gChan th, #gChan td, #gChan tfoot td, #gProd th, #gProd td, #gProd tfoot td, #mProd th, #mProd td, #mProd tfoot td{text-align:center}

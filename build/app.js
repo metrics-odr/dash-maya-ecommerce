@@ -188,8 +188,9 @@ function renderTable(cfg){
   const ext={};
   cfg.cols.forEach(c=>{ if(c.heat){ const vs=rows.map(r=>r.cells[c.key]).filter(v=>v!=null&&isFinite(v)); ext[c.key]=[Math.min(...vs),Math.max(...vs)]; }});
   const fmt=(t,v)=> t==='brl'?brl(v):t==='pct'?pct(v):t==='int'?intf(v):t==='num'?numf(v):t==='roas'?roasf(v):t==='date'?brdate(v):dimf(v);
-  const widths=cfg.cols.map(c=>colWidth(cfg,c)); const totalW=widths.reduce((a,b)=>a+b,0);
-  const colgroup='<colgroup>'+cfg.cols.map((c,i)=>`<col style="width:${widths[i]}px">`).join('')+'</colgroup>';
+  const widths=cfg.cols.map(c=>cfg.fit?(c.w||(c.type==='dim'?(c.big?300:130):88)):colWidth(cfg,c)); const totalW=widths.reduce((a,b)=>a+b,0);
+  /* fit: colunas proporcionais (%), tabela sempre na largura do card — sem scroll lateral */
+  const colgroup='<colgroup>'+cfg.cols.map((c,i)=>`<col style="width:${cfg.fit?(widths[i]/totalW*100).toFixed(3)+'%':widths[i]+'px'}">`).join('')+'</colgroup>';
   let thead='<thead><tr>'+cfg.cols.map((c,i)=>{
     const sc = sortState&&sortState.key===c.key ? (sortState.dir==='asc'?'sorted-asc':'sorted-desc') : '';
     return `<th class="${c.type==='dim'?'dim ':''}${sc}" data-k="${c.key}" data-ci="${i}">${c.label}<span class="rsz"></span></th>`;
@@ -209,7 +210,8 @@ function renderTable(cfg){
   if(cfg.total){ tfoot='<tfoot><tr>'+cfg.cols.map((c,i)=>{
     const v=cfg.total[c.key]; return `<td class="${c.type==='dim'?'dim':''}">${i===0?(v==null?'Total Geral':fmt(c.type,v)):fmt(c.type,v)}</td>`;
   }).join('')+'</tr></tfoot>'; }
-  table.style.width=totalW+'px';
+  table.style.width=cfg.fit?'100%':totalW+'px';
+  table.classList.toggle('fit',!!cfg.fit);
   table.innerHTML=colgroup+thead+tbody+tfoot;
   const cols=table.querySelector('colgroup').children;
   table.querySelectorAll('thead th').forEach(th=>{
@@ -222,6 +224,7 @@ function renderTable(cfg){
     });
   });
   table.querySelectorAll('thead th .rsz').forEach(g=>{
+    if(cfg.fit){ g.remove(); return; }
     g.addEventListener('mousedown',e=>{ e.preventDefault(); e.stopPropagation();
       const th=g.parentElement, k=th.dataset.k, ci=+th.dataset.ci, x0=e.clientX;
       const w0=cols[ci].offsetWidth, tw0=table.offsetWidth;
@@ -400,8 +403,8 @@ function renderProdTable(id, salesSet){
   salesSet.forEach(r=>{ const a=by[r.prod]||(by[r.prod]={n:0,v:0}); a.n+=r.n; a.v+=r.val; totN+=r.n; totV+=r.val; });
   const rows=Object.entries(by).sort((a,b)=>b[1].v-a[1].v).map(([prod,a])=>
     ({k:prod, cells:{prod:prod, itens:a.n, fat:a.v, ticket:a.n?a.v/a.n:null, pctf:totV?a.v/totV:null}}));
-  renderTable({id, cols:[{key:'prod',label:'Produto',type:'dim',big:true},{key:'itens',label:'Itens',type:'int',w:70},
-      {key:'fat',label:'Faturamento',type:'brl',w:110},{key:'ticket',label:'Ticket Médio',type:'brl',w:110},{key:'pctf',label:'% Fat.',type:'pct',w:80}],
+  renderTable({id, fit:true, cols:[{key:'prod',label:'Produto',type:'dim',w:190},{key:'itens',label:'Itens',type:'int',w:46},
+      {key:'fat',label:'Faturamento',type:'brl',w:96},{key:'ticket',label:'Ticket',type:'brl',w:80},{key:'pctf',label:'% Fat.',type:'pct',w:60}],
     rows, total:{prod:null,itens:totN,fat:totV,ticket:totN?totV/totN:null,pctf:totV?1:null}});
 }
 
@@ -650,11 +653,11 @@ function renderGeral(){
     const f=r=>(r.src||r.ch)===ch, x=totals(S.fS.filter(f),S.fM.filter(f),S.fG.filter(f)), dv=derive(x);
     return {k:ch, cells:{dim:CH_LABEL[ch], gasto:dv.gasto, cliques:x.cl, pv:x.pv, ck:x.ck, vendas:x.vendas, cac:dv.cac, fat:x.fat, ticket:dv.ticket, roas:dv.roas, share:t.fat?x.fat/t.fat:null}};
   });
-  renderTable({id:'gChan', cols:[{key:'dim',label:'Canal',type:'dim',w:130},
-      {key:'gasto',label:'Gasto',type:'brl'},{key:'cliques',label:'Cliques',type:'int'},{key:'pv',label:'Page Views',type:'int'},
-      {key:'ck',label:'Checkouts',type:'int'},{key:'vendas',label:'Compras',type:'int',heat:'vendas'},{key:'cac',label:'CAC',type:'brl'},
-      {key:'fat',label:'Faturamento',type:'brl',heat:'fat',w:120},{key:'ticket',label:'Ticket',type:'brl'},{key:'roas',label:'ROAS',type:'roas'},
-      {key:'share',label:'% Fat.',type:'pct'}],
+  renderTable({id:'gChan', fit:true, cols:[{key:'dim',label:'Canal',type:'dim',w:104},
+      {key:'gasto',label:'Gasto',type:'brl',w:86},{key:'cliques',label:'Cliques',type:'int',w:60},{key:'pv',label:'Page Views',type:'int',w:72},
+      {key:'ck',label:'Checkouts',type:'int',w:72},{key:'vendas',label:'Compras',type:'int',heat:'vendas',w:66},{key:'cac',label:'CAC',type:'brl',w:78},
+      {key:'fat',label:'Faturamento',type:'brl',heat:'fat',w:96},{key:'ticket',label:'Ticket',type:'brl',w:78},{key:'roas',label:'ROAS',type:'roas',w:52},
+      {key:'share',label:'% Fat.',type:'pct',w:58}],
     rows:chRows,
     total:{dim:null,gasto:d.gasto,cliques:t.cl,pv:t.pv,ck:t.ck,vendas:t.vendas,cac:d.cac,fat:t.fat,ticket:d.ticket,roas:d.roas,share:t.fat?1:null}});
 
