@@ -59,6 +59,9 @@ GID_GA4 = cfg.GID_GA4
 GID_META = getattr(cfg, "GID_META", "") or ""
 GID_GOOGLE = getattr(cfg, "GID_GOOGLE", "") or ""
 GID_TIKTOK = getattr(cfg, "GID_TIKTOK", "") or ""
+# aba extra do Google só com campanhas Shopping/PMax (soma ao canal Google, sem duplicar a aba geral)
+GID_GOOGLE_SHOP = getattr(cfg, "GID_GOOGLE_SHOP", "") or ""
+GOOGLE_SHOP_PATTERN = getattr(cfg, "GOOGLE_SHOP_PATTERN", r"shop|pmax|p-max|performance[ _-]?max")
 # abas de gasto por estado (uma por canal; só entram no mapa da Visão Geral)
 GEO_GIDS = {"meta": getattr(cfg, "GID_GEO_META", "") or "", "google": getattr(cfg, "GID_GEO_GOOGLE", "") or ""}
 TAX_FACTOR = cfg.TAX_FACTOR
@@ -606,6 +609,28 @@ def load_geo(rows, ch):
     return out
 
 
+def load_google_shop(rows, existing):
+    """Aba Google Shopping/PMax -> mesmas linhas do canal Google. Ignora campanhas fora de
+    Shopping/PMax (ex.: rede de pesquisa) e campanhas que já vieram da aba geral do Google
+    (`existing`), para não contar o mesmo gasto duas vezes."""
+    recs, _ = load_media(rows, "google")
+    have = {norm(m["camp"]) for m in existing}
+    pat = re.compile(GOOGLE_SHOP_PATTERN, re.I)
+    out, skipped = [], {}
+    for m in recs:
+        k = norm(m["camp"])
+        if not pat.search(m["camp"]):
+            skipped.setdefault(m["camp"], "fora de Shopping/PMax")
+        elif k in have:
+            skipped.setdefault(m["camp"], "já existe na aba geral do Google")
+        else:
+            m["adset"], m["ad"] = "(Shopping/PMax)", "(sem anúncio)"
+            out.append(m)
+    for c, why in skipped.items():
+        print(f"  google shop/pmax: ignorada '{c}' ({why})", file=sys.stderr)
+    return out
+
+
 def process(media_rows, ga_rows, sales_rows, geo_rows=None):
     """media_rows = {"meta": rows|None, "google": rows|None, "tiktok": rows|None}"""
     media, ad_links = [], {}
@@ -613,6 +638,8 @@ def process(media_rows, ga_rows, sales_rows, geo_rows=None):
         recs, links = load_media(media_rows.get(ch) or [], ch)
         media += recs
         ad_links.update(links)
+        if ch == "google" and media_rows.get("google_shop"):
+            media += load_google_shop(media_rows["google_shop"], recs)
     ga = load_ga4(ga_rows)
     sales, buyers, perfil = load_sales(sales_rows, media)
 
@@ -702,6 +729,7 @@ def main():
     ap.add_argument("--meta-file")
     ap.add_argument("--google-file")
     ap.add_argument("--tiktok-file")
+    ap.add_argument("--google-shop-file")
     ap.add_argument("--geo-meta-file")
     ap.add_argument("--geo-google-file")
     ap.add_argument("--ga4-file")
@@ -715,6 +743,8 @@ def main():
                            ("tiktok", GID_TIKTOK, args.tiktok_file)):
         # canal sem planilha ainda (GID vazio e sem arquivo local) = "aguardando"
         media_rows[ch] = load_rows(EXPORT_URL.format(sid=SPREADSHEET_ID, gid=gid), local) if (gid or local) else []
+    if GID_GOOGLE_SHOP or args.google_shop_file:
+        media_rows["google_shop"] = load_rows(EXPORT_URL.format(sid=SPREADSHEET_ID, gid=GID_GOOGLE_SHOP), args.google_shop_file)
     ga_rows = load_rows(EXPORT_URL.format(sid=SPREADSHEET_ID, gid=GID_GA4), args.ga4_file)
     sales_rows = load_rows(EXPORT_URL.format(sid=SPREADSHEET_ID, gid=GID_SALES), args.sales_file)
     geo_rows = {}

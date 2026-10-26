@@ -168,6 +168,7 @@ def main():
     ap.add_argument("--meta-file")
     ap.add_argument("--google-file")
     ap.add_argument("--tiktok-file")
+    ap.add_argument("--google-shop-file")
     ap.add_argument("--ga4-file")
     ap.add_argument("--sales-file")
     ap.add_argument("--out", default=os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -180,6 +181,8 @@ def main():
     for ch, gid, local in (("meta", build.GID_META, args.meta_file), ("google", build.GID_GOOGLE, args.google_file),
                            ("tiktok", build.GID_TIKTOK, args.tiktok_file)):
         media_rows[ch] = build.load_rows(build.EXPORT_URL.format(sid=build.SPREADSHEET_ID, gid=gid), local) if (gid or local) else []
+    if build.GID_GOOGLE_SHOP or args.google_shop_file:
+        media_rows["google_shop"] = build.load_rows(build.EXPORT_URL.format(sid=build.SPREADSHEET_ID, gid=build.GID_GOOGLE_SHOP), args.google_shop_file)
     ga_rows = build.load_rows(build.EXPORT_URL.format(sid=build.SPREADSHEET_ID, gid=build.GID_GA4), args.ga4_file)
     sales_rows = build.load_rows(build.EXPORT_URL.format(sid=build.SPREADSHEET_ID, gid=build.GID_SALES), args.sales_file)
     data = build.process(media_rows, ga_rows, sales_rows)
