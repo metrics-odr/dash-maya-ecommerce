@@ -202,13 +202,16 @@ function renderTable(cfg){
       if(c.heat && ext[c.key]) bg=`background:${heat(v,ext[c.key][0],ext[c.key][1],c.heat)}`;
       const cls=(c.type==='dim'?'dim':'');
       const dot = (ci===0 && cfg.statusMap) ? statusDot(cfg.statusMap[r.k]) : '';
-      return `<td class="${cls}" style="${bg}">${dot}${fmt(c.type,v)}</td>`;
+      const dl = c.delta && r.prev ? deltaBadge(v,r.prev[c.key],c.key) : '';
+      return `<td class="${cls}" style="${bg}">${dot}${dl?`<span class="mv">${fmt(c.type,v)}${dl}</span>`:fmt(c.type,v)}</td>`;
     }).join('');
     return `<tr class="${sel?'sel':''}" data-k="${encodeURIComponent(r.k)}">${tds}</tr>`;
   }).join('')+'</tbody>';
   let tfoot='';
   if(cfg.total){ tfoot='<tfoot><tr>'+cfg.cols.map((c,i)=>{
-    const v=cfg.total[c.key]; return `<td class="${c.type==='dim'?'dim':''}">${i===0?(v==null?'Total Geral':fmt(c.type,v)):fmt(c.type,v)}</td>`;
+    const v=cfg.total[c.key], dl=c.delta&&cfg.totalPrev?deltaBadge(v,cfg.totalPrev[c.key],c.key):'';
+    const txt=i===0?(v==null?'Total Geral':fmt(c.type,v)):fmt(c.type,v);
+    return `<td class="${c.type==='dim'?'dim':''}">${dl?`<span class="mv">${txt}${dl}</span>`:txt}</td>`;
   }).join('')+'</tr></tfoot>'; }
   table.style.width=cfg.fit?'100%':totalW+'px';
   table.classList.toggle('fit',!!cfg.fit);
@@ -424,6 +427,9 @@ function deltaBadge(cur,prev,key){
   const good=flat?null:(GOOD_LOW[key]?!up:up);
   const cls=flat?'flat':(good?'good':'bad'), arrow=flat?'→':(up?'▲':'▼');
   return `<span class="delta ${cls}">${arrow} ${nf1.format(Math.abs(p))}%</span>`;
+}
+/* variação por canal (tabela "Resultado por canal"): mesmo cálculo, mas das células já derivadas */
+function chanCells(x,dv){ return {gasto:dv.gasto,cliques:x.cl,pv:x.pv,ck:x.ck,vendas:x.vendas,cac:dv.cac,fat:x.fat,ticket:dv.ticket,roas:dv.roas};
 }
 /* sparkline (SVG) da série diária de uma etapa; sem dados suficientes -> vazio.
    dates/fmt alimentam o tooltip ao passar o mouse (ver initSparkTip) */
@@ -649,17 +655,20 @@ function renderGeral(){
   renderProdTable('gProd', S.fS);
 
   /* resumo por canal */
+  const PV=pw?scopeData(null,null,pw,true):null;
   const chRows=['meta','google','tiktok','instagram_org','gpt','google_org','direto','outros'].map(ch=>{
     const f=r=>(r.src||r.ch)===ch, x=totals(S.fS.filter(f),S.fM.filter(f),S.fG.filter(f)), dv=derive(x);
-    return {k:ch, cells:{dim:CH_LABEL[ch], gasto:dv.gasto, cliques:x.cl, pv:x.pv, ck:x.ck, vendas:x.vendas, cac:dv.cac, fat:x.fat, ticket:dv.ticket, roas:dv.roas, share:t.fat?x.fat/t.fat:null}};
+    let prev=null; if(PV){ const xp=totals(PV.fS.filter(f),PV.fM.filter(f),PV.fG.filter(f)); prev=chanCells(xp,derive(xp)); }
+    return {k:ch, prev, cells:{dim:CH_LABEL[ch], ...chanCells(x,dv), share:t.fat?x.fat/t.fat:null}};
   });
   renderTable({id:'gChan', fit:true, cols:[{key:'dim',label:'Canal',type:'dim',w:104},
-      {key:'gasto',label:'Gasto',type:'brl',w:86},{key:'cliques',label:'Cliques',type:'int',w:60},{key:'pv',label:'Page Views',type:'int',w:72},
-      {key:'ck',label:'Checkouts',type:'int',w:72},{key:'vendas',label:'Compras',type:'int',heat:'vendas',w:66},{key:'cac',label:'CAC',type:'brl',w:78},
-      {key:'fat',label:'Faturamento',type:'brl',heat:'fat',w:96},{key:'ticket',label:'Ticket',type:'brl',w:78},{key:'roas',label:'ROAS',type:'roas',w:52},
+      {key:'gasto',label:'Gasto',type:'brl',w:132,delta:1},{key:'cliques',label:'Cliques',type:'int',w:104,delta:1},{key:'pv',label:'Page Views',type:'int',w:116,delta:1},
+      {key:'ck',label:'Checkouts',type:'int',w:108,delta:1},{key:'vendas',label:'Compras',type:'int',heat:'vendas',w:100,delta:1},{key:'cac',label:'CAC',type:'brl',w:124,delta:1},
+      {key:'fat',label:'Faturamento',type:'brl',heat:'fat',w:140,delta:1},{key:'ticket',label:'Ticket',type:'brl',w:124,delta:1},{key:'roas',label:'ROAS',type:'roas',w:96,delta:1},
       {key:'share',label:'% Fat.',type:'pct',w:58}],
     rows:chRows,
-    total:{dim:null,gasto:d.gasto,cliques:t.cl,pv:t.pv,ck:t.ck,vendas:t.vendas,cac:d.cac,fat:t.fat,ticket:d.ticket,roas:d.roas,share:t.fat?1:null}});
+    total:{dim:null,...chanCells(t,d),share:t.fat?1:null},
+    totalPrev:PV?(()=>{ const tpv=totals(PV.fS,PV.fM,PV.fG); return chanCells(tpv,derive(tpv)); })():null});
 
   const dl=dd.slice().reverse();
   renderTable({id:'gDaily', cols:DAILY_COLS,
