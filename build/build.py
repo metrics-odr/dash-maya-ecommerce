@@ -492,8 +492,12 @@ def load_sales(rows, media):
             if norm(h) in ("uf", "cliente / uf", "estado (uf)"):
                 sidx["uf"] = i
                 break
-    camp_map, ad_map, adname_map = {}, {}, {}
+    camp_map, ad_map, adname_map, gadset_map = {}, {}, {}, {}
     for m in media:
+        if m["ch"] == "google" and m["adset"] != "(sem conjunto)":
+            # Google: utm_medium costuma carregar o Ad Group Name ({adgroupname}) -> (campanha, ad group) reais
+            gadset_map.setdefault((norm(m["camp"]), norm(m["adset"])), m["adset"])
+            gadset_map.setdefault(("", norm(m["adset"])), set()).add((m["camp"], m["adset"]))
         if m["ch"] == "meta" and m["ad"] != "(sem anúncio)":
             adname_map.setdefault(norm(m["ad"]), set()).add((m["camp"], m["adset"]))
         k = norm(m["camp"])
@@ -526,6 +530,10 @@ def load_sales(rows, media):
             if hit and hit[0]:
                 ch, camp = hit[0], hit[1]          # campanha real da plataforma manda no canal
                 sg = ch
+            elif (ch == "outros" and re.search(r"google[\s_\-]*ads|adwords", norm(src))
+                  and gadset_map.get(("", norm(_clean_utm(med))))):
+                # utm_source "Google-Ads" + utm_medium = Ad Group real do Google: é Google Ads pago
+                ch = sg = "google"
             elif utm_ad and len(adname_map.get(norm(utm_ad), ())) == 1:
                 # sem campanha reconhecível, mas utm_content = Ad Name único do Meta: herda campanha/conjunto
                 ch = sg = "meta"
@@ -533,6 +541,15 @@ def load_sales(rows, media):
             adset = adset_hit if (ch == "meta" and not hit and utm_ad and len(adname_map.get(norm(utm_ad), ())) == 1) else ""
             if ch == "meta" and not adset:
                 adset = ad_map.get((norm(camp), norm(utm_ad))) or _clean_utm(cell(row, sidx["utm_medium"]))
+            elif ch == "google":
+                utm_med = norm(_clean_utm(med))
+                if utm_med:
+                    adset = gadset_map.get((norm(camp), utm_med)) or ""
+                    if not adset and not hit:
+                        # campanha não reconhecida, mas ad group único no Google: herda campanha/grupo
+                        cands = gadset_map.get(("", utm_med), set())
+                        if len(cands) == 1:
+                            camp, adset = next(iter(cands))
             order_attr[oid] = {"d": parse_date(cell(row, sidx["created"])), "ch": ch, "src": sg, "camp": camp,
                                "adset": adset or "(sem conjunto)",
                                # utm_content só identifica anúncio no Meta (no Google costuma ser posicionamento/link)
