@@ -13,9 +13,9 @@
   .nav-item{display:flex; align-items:center; gap:10px; padding:10px 20px; color:#c7c9d6; cursor:pointer; border-left:3px solid transparent; font-size:13.5px}
   .nav-item:hover{background:rgba(255,255,255,.06); color:#fff}
   .nav-item.active{background:var(--nav-active-bg); color:#fff; border-left-color:var(--accent-blue)}
-  .nav-item .ic{width:16px; text-align:center; opacity:.9}
+  .nav-item .ic{width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; opacity:.9; flex:none}
+  .nav-item.active .ic,.nav-item:hover .ic{opacity:1}
   /* logos das redes (SVG inline, cores originais): mesma caixa de 16px dos demais ícones, sem a opacidade do glifo */
-  .nav-item .ic-svg{width:16px; height:16px; flex:0 0 16px; opacity:1; display:block}
   .sidebar .foot{margin-top:auto; border-top:1px solid rgba(255,255,255,.08); padding:12px 20px; font-size:11px; opacity:.35}
   .ham{display:none}
   #navToggle{display:none}
