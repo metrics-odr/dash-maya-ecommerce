@@ -150,7 +150,7 @@
       <!-- ===================== PÁGINA 2: CANAL DE MÍDIA (Meta / Google / TikTok) ===================== -->
       <div class="page" id="page-ch">
         <div class="card" id="chWait" hidden style="margin-bottom:14px"><b>Aguardando dados do <span id="chWaitName"></span>.</b> A planilha de mídia deste canal ainda não foi conectada (gasto, impressões e cliques aparecem zerados). Funil do GA4 e compras atribuídas ao canal já são exibidos.</div>
-        <div class="card" id="chSelNote" hidden style="margin-bottom:14px">Filtro de campanha/conjunto/anúncio ativo: o GA4 não separa o funil por campanha, então <b>Page Views → Checkouts</b> ficam ocultos. Use <b>Remover Filtros</b> para ver o funil completo do canal.</div>
+        <div class="card" id="chSelNote" hidden style="margin-bottom:14px">Filtro de campanha/conjunto/anúncio/palavra-chave ativo: o GA4 não separa o funil por campanha, então <b>Page Views → Checkouts</b> ficam ocultos. Use <b>Remover Filtros</b> para ver o funil completo do canal.</div>
         <h2 class="sec-title">Funil &amp; combinação diária · <span class="ch-name"></span></h2>
         <div class="grid funnel-grid">
           <div class="card"><div class="funnel" id="metaFunnel"></div>
@@ -194,11 +194,11 @@
           <div class="pair-chart"><div class="pc-title">CAC por anúncio, por dia</div><canvas id="chAd"></canvas></div>
         </div>
         <div class="table-chart-pair" id="kwTableBlock" hidden>
-          <div class="thead-title"><span>Palavras-chave</span><input type="text" class="tbl-search" id="searchKw" placeholder="Buscar palavra-chave..."></div>
+          <div class="thead-title"><span>Palavras-chave</span><input type="text" class="tbl-search" id="searchKw" placeholder="Buscar palavra-chave..."><button class="btn-mini" id="clearKwBtn" title="Remover só o filtro de palavra-chave">✕ Filtro</button></div>
           <div class="tbl-wrap tbl-normal"><table class="dt" id="tKw"></table></div>
           <div class="pair-chart"><div class="pc-title">CAC por palavra-chave, por dia</div><canvas id="chKw"></canvas></div>
         </div>
-        <p class="note" id="kwNote" hidden>Palavras-chave: a mídia vem da coluna de palavra-chave da aba Google Ads e as compras são cruzadas por <b>utm_term</b>. Compras sem utm_term ficam em “(sem palavra-chave)”; respeita o período e a campanha selecionada.</p>
+        <p class="note" id="kwNote" hidden>Palavras-chave: a mídia vem da coluna de palavra-chave da aba Google Ads e as compras são cruzadas por <b>utm_term</b>. Compras sem utm_term ficam em “(sem palavra-chave)”; respeita o período e a campanha selecionada. <b>Clique numa palavra-chave</b> para filtrar campanhas, grupos e anúncios que a usam (Ctrl/Cmd+clique seleciona várias).</p>
         <p class="note">Campanha/conjunto/anúncio vêm da aba de mídia; as compras são atribuídas por <b>utm_campaign</b> (e utm_content no Meta). O funil do GA4 não existe nesse nível, por isso as tabelas mostram mídia + compras.</p>
 
         <h2 class="sec-title">Compradores <span class="pill q" id="qCount"></span></h2>
